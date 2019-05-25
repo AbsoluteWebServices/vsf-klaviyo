@@ -54,7 +54,9 @@ export const mapLineItem = (product) => {
 }
 
 export const mapCart = (cart) => {
-  let link = router.resolve({ name: 'checkout' })
+  let token = rootStore.getters['user/getUserToken']
+  let cartId = cart.cartServerToken
+  let link = router.resolve({ name: 'klaviyo-checkout', params: { token, cartId } })
   let products = []
 
   for (let i = 0; i < cart.cartItems.length; i++) {
@@ -63,7 +65,7 @@ export const mapCart = (cart) => {
   }
 
   return {
-    '$event_id': cart.cartServerToken,
+    '$event_id': cartId,
     '$value': cart.platformTotals.grand_total,
     'ItemNames': products.map(prod => prod.ProductName),
     'CheckoutURL': window.location.origin + link.href,
