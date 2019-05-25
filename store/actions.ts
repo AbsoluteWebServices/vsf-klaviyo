@@ -66,6 +66,42 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
+  subscribe ({ commit, state }, email): Promise<Response> {
+    if (!state.isSubscribed) {
+      return new Promise((resolve, reject) => {
+        fetch(config.klaviyo.endpoint.subscribe, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          body: JSON.stringify({ email })
+        }).then(res => {
+          commit(types.NEWSLETTER_SUBSCRIBE)
+          resolve(res)
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    }
+  },
+
+  unsubscribe ({ commit, state }, email): Promise<Response> {
+    if (!state.isSubscribed) {
+      return new Promise((resolve, reject) => {
+        fetch(config.klaviyo.endpoint.subscribe, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          body: JSON.stringify({ email })
+        }).then(res => {
+          commit(types.NEWSLETTER_UNSUBSCRIBE)
+          resolve(res)
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    }
+  },
+
   productViewed ({ dispatch }, product): Promise<Response> {
     return dispatch('track', { event: 'Viewed Product', data: mapProduct(product) })
   },
