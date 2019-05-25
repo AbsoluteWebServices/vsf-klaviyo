@@ -8,34 +8,38 @@ const encode = (json) => {
   return window.btoa(JSON.stringify(json))
 }
 
+// it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<KlaviyoState, any> = {
-  async identify ({ commit }, user) {
+  identify ({ commit }, user): Promise<Response> {
     let customer = mapCustomer(user)
     let request = {
       token: config.klaviyo.public_key,
       properties: customer
     }
 
-    let url = config.klaviyo.endpoint
+    let url = config.klaviyo.endpoint.api
     url += '/identify'
     url = new URL(url),
     url.searchParams.append('data', encode(request))
 
-    const resp = await fetch(url, {
-      method: 'GET',
-      mode: 'cors'
+    return new Promise((resolve, reject) => {
+      fetch(url, {
+        method: 'GET',
+        mode: 'cors'
+      }).then(res => {
+        commit(types.SET_CUSTOMER, customer)
+        resolve(res)
+      }).catch(err => {
+        reject(err)
+      })
     })
-
-    if (resp.ok) {
-      commit(types.SET_CUSTOMER, customer)
-    }
-
-    return resp.ok
   },
 
-  async track ({ state }, { event, data }) {
+  track ({ state }, { event, data }): Promise<Response> {
     if (state.customer === null) {
-      return false
+      return new Promise((resolve, reject) => {
+        reject()
+      })
     }
 
     let request = {
@@ -45,43 +49,53 @@ export const actions: ActionTree<KlaviyoState, any> = {
       properties : data
     }
 
-    let url = config.klaviyo.endpoint
+    let url = config.klaviyo.endpoint.api
     url += '/track'
     url = new URL(url),
     url.searchParams.append('data', encode(request))
 
-    const resp = await fetch(url, {
-      method: 'GET',
-      mode: 'cors'
+    return new Promise((resolve, reject) => {
+      fetch(url, {
+        method: 'GET',
+        mode: 'cors'
+      }).then(res => {
+        resolve(res)
+      }).catch(err => {
+        reject(err)
+      })
     })
-    
-    return resp.ok
   },
 
-  async productViewed ({ dispatch }, product) {
-    dispatch('track', { event: 'Viewed Product', data: mapProduct(product) })
+  productViewed ({ dispatch }, product): Promise<Response> {
+    return dispatch('track', { event: 'Viewed Product', data: mapProduct(product) })
   },
 
-  async productAddedToCart ({ dispatch }, product) {
-    dispatch('track', { event: 'Added to Cart Product', data: mapLineItem(product) })
+  productAddedToCart ({ dispatch }, product): Promise<Response> {
+    return dispatch('track', { event: 'Added to Cart Product', data: mapLineItem(product) })
   },
 
-  async productRemovedFromCart ({ dispatch }, product) {
-    dispatch('track', { event: 'Removed from Cart Product', data: mapLineItem(product) })
+  productRemovedFromCart ({ dispatch }, product): Promise<Response> {
+    return dispatch('track', { event: 'Removed from Cart Product', data: mapLineItem(product) })
   },
 
-  async checkoutStarted ({ dispatch }, cart) {
-    dispatch('track', { event: 'Started Checkout', data: mapCart(cart) })
+  checkoutStarted ({ dispatch }, cart): Promise<Response> {
+    return dispatch('track', { event: 'Started Checkout', data: mapCart(cart) })
   },
 
-  async orderPlaced ({ dispatch }, order) {
-    dispatch('track', { event: 'Placed Order', data: mapOrder(order) })
-    order.products.forEach(product => {
-      dispatch('productOrdered', { order, product })
-    });
+  orderPlaced ({ dispatch }, order): Promise<Response> {
+    return new Promise((resolve, reject) => {
+      dispatch('track', { event: 'Placed Order', data: mapOrder(order) }).then(res => {
+        order.products.forEach(product => {
+          dispatch('productOrdered', { order, product })
+        })
+        resolve(res)
+      }).catch(err => {
+        reject(err)
+      })
+    })
   },
 
-  async productOrdered ({ dispatch }, { order, product }) {
-    dispatch('track', { event: 'Ordered Product', data: mapOrderedProduct(order, product) })
-  },
+  productOrdered ({ dispatch }, { order, product }): Promise<Response> {
+    return dispatch('track', { event: 'Ordered Product', data: mapOrderedProduct(order, product) })
+  }
 }
