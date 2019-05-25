@@ -24,8 +24,11 @@ export const mapProduct = (product) => {
     for (let i = 0; i < rootStore.state.category.list.length; i++) {
       const category = rootStore.state.category.list[i]
 
-      if (product.extension_attributes.category_links.indexOf(category.id) !== -1) {
-        categories.push(category.name)
+      for (let j = 0; j < product.extension_attributes.category_links.length; j++) {
+        const productCategory = product.extension_attributes.category_links[j]
+        if (productCategory.category_id === category.id) {
+          categories.push(category.name)
+        }
       }
     }
   }
@@ -76,26 +79,36 @@ export const mapOrder = (order) => {
     products.push(mapLineItem(product))
   }
 
+  let subtotal = 0
   let categories = []
   for (let i = 0; i < products.length; i++) {
     const product = products[i]
-    for (let j = 0; j < product.categories.length; j++) {
-      const category = product.categories[j]
+    subtotal += product.RowTotal
+    for (let j = 0; j < product.Categories.length; j++) {
+      const category = product.Categories[j]
       if (categories.indexOf(category) === -1) {
         categories.push(category)
       }
     }
   }
 
-  return {
+  let result = {
     '$event_id': order.id.toString(),
-    '$value': order.cart.platformTotals.grand_total,
+    '$value': subtotal,
     'ItemNames': products.map(prod => prod.ProductName),
     'Categories': categories,
-    // 'Discount Code': 'Free Shipping',
-    'Discount Value': order.cart.platformTotals.discount_amount,
     'Items': products
   }
+
+  if (order.cart) {
+    result['$value'] = order.cart.platformTotals.grand_total
+    if (order.cart.platformTotals.discount_amount) {
+      // result['Discount Code'] = 'Free Shipping'
+      result['Discount Value'] = order.cart.platformTotals.discount_amount
+    }
+  }
+
+  return result
 }
 
 export const mapOrderedProduct = (order, product) => {
