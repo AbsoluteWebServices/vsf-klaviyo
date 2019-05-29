@@ -3,11 +3,19 @@ import { formatProductLink } from '@vue-storefront/core/modules/url/helpers'
 import { router } from '@vue-storefront/core/app'
 
 export const mapCustomer = (user) => {
-  return {
-    '$email': user.email,
-    '$first_name': user.firstname,
-    '$last_name': user.lastname
+  let customer = {
+    '$email': user.email
   }
+
+  if (user.firstname) {
+    customer['$first_name'] = user.firstname
+  }
+
+  if (user.lastname) {
+    customer['$last_name'] = user.lastname
+  }
+
+  return customer
 }
 
 export const mapProduct = (product) => {

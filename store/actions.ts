@@ -2,6 +2,7 @@ import KlaviyoState from '../types/KlaviyoState'
 import { ActionTree } from 'vuex'
 import * as types from './mutation-types'
 import config from 'config'
+import rootStore from '@vue-storefront/core/store'
 import { mapCustomer, mapProduct, mapOrder, mapCart, mapLineItem, mapOrderedProduct } from '../helpers/mappers'
 
 const encode = (json) => {
@@ -76,6 +77,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
           body: JSON.stringify({ email })
         }).then(res => {
           commit(types.NEWSLETTER_SUBSCRIBE)
+
+          if (!state.customer) {
+            let customer = mapCustomer({ email })
+            commit(types.SET_CUSTOMER, customer)
+          }
+
           resolve(res)
         }).catch(err => {
           reject(err)
@@ -94,6 +101,11 @@ export const actions: ActionTree<KlaviyoState, any> = {
           body: JSON.stringify({ email })
         }).then(res => {
           commit(types.NEWSLETTER_UNSUBSCRIBE)
+
+          if (!rootStore.state.user.current || !rootStore.state.user.current.email) {
+            commit(types.SET_CUSTOMER, null)
+          }
+
           resolve(res)
         }).catch(err => {
           reject(err)
