@@ -92,7 +92,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   },
 
   unsubscribe ({ commit, state }, email): Promise<Response> {
-    if (!state.isSubscribed) {
+    if (state.isSubscribed) {
       return new Promise((resolve, reject) => {
         fetch(config.klaviyo.endpoint.subscribe, {
           method: 'DELETE',
@@ -107,6 +107,75 @@ export const actions: ActionTree<KlaviyoState, any> = {
           }
 
           resolve(res)
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    }
+  },
+
+  backInStockSubscribe ({ commit, getters }, { product, email, subscribeForNewsletter }): Promise<Response> {
+    if (!getters.isWatching(product.sku)) {
+      let formData = new FormData()
+
+      formData.append('a', config.klaviyo.public_key)
+      formData.append('email', email)
+      formData.append('g', config.klaviyo.listId)
+      formData.append('variant', product.sku)
+      formData.append('product', product.parentSku ? product.parentSku : product.sku)
+      formData.append('platform', config.klaviyo.platform)
+      formData.append('subscribe_for_newsletter', subscribeForNewsletter)
+
+      return new Promise((resolve, reject) => {
+        fetch(config.klaviyo.endpoint.backInStock, {
+          method: 'POST',
+          mode: 'cors',
+          body: formData
+        }).then(res => {
+          res.json().then(json => {
+            if (json.success) {
+              commit(types.BACK_IN_STOCK_SUBSCRIBE, product.sku)
+              resolve(res)
+            }
+            else {
+              reject(res)
+            }
+          })
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    }
+  },
+
+  backInStockUnsubscribe ({ commit, getters }, { product, email, subscribeForNewsletter }): Promise<Response> {
+    if (getters.isWatching(product.sku)) {
+      let formData = new FormData()
+      
+      formData.append('a', config.klaviyo.public_key)
+      formData.append('email', email)
+      formData.append('g', config.klaviyo.listId)
+      formData.append('variant', product.sku)
+      formData.append('product', product.parentSku ? product.parentSku : product.sku)
+      formData.append('platform', config.klaviyo.platform)
+      formData.append('subscribe_for_newsletter', subscribeForNewsletter)
+
+      return new Promise((resolve, reject) => {
+        fetch(config.klaviyo.endpoint.subscribe, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          body: formData
+        }).then(res => {
+          res.json().then(json => {
+            if (json.success) {
+              commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.sku)
+              resolve(res)
+            }
+            else {
+              reject(res)
+            }
+          })
         }).catch(err => {
           reject(err)
         })

@@ -26,8 +26,13 @@ export function afterRegistration({ Vue, config, store, isServer }) {
     })
 
     Vue.prototype.$bus.$on('checkout-after-mounted', event => { // TODO: maybe bind it to another event
-      let cart = rootStore.state.cart
-      store.dispatch('klaviyo/checkoutStarted', cart)
+      const onCheckoutStarted = event => {
+        Vue.prototype.$bus.$off('cart-after-updatetotals', onCheckoutStarted)
+        let cart = rootStore.state.cart
+        store.dispatch('klaviyo/checkoutStarted', cart)
+      }
+
+      Vue.prototype.$bus.$on('cart-after-updatetotals', onCheckoutStarted)
     })
 
     Vue.prototype.$bus.$on('order-after-placed', event => {

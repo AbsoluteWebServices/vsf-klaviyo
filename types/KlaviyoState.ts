@@ -3,4 +3,5 @@
 export default interface KlaviyoState {
   customer: Object | null,
   isSubscribed: boolean | null,
+  backInStockWatching: Array<String>
 }

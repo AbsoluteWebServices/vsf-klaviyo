@@ -11,5 +11,14 @@ export const mutations: MutationTree<KlaviyoState> = {
   },
   [types.NEWSLETTER_UNSUBSCRIBE] (state) {
     state.isSubscribed = false
+  },
+  [types.BACK_IN_STOCK_SUBSCRIBE] (state, productSku) {
+    state.backInStockWatching.push(productSku)
+  },
+  [types.BACK_IN_STOCK_UNSUBSCRIBE] (state, productSku) {
+    let index = state.backInStockWatching.indexOf(productSku)
+    if (index !== -1) {
+      state.backInStockWatching.splice(index, 1)
+    }
   }
 }
