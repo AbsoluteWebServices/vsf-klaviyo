@@ -16,7 +16,7 @@ module.exports = ({ config, db }) => {
 
     let request = require('request')
     request({
-      url: config.extensions.klaviyo.apiUrl + '/list/' + config.extensions.klaviyo.listId + '/subscribe',
+      url: config.extensions.klaviyo.apiUrl + '/v2/list/' + config.extensions.klaviyo.listId + '/subscribe',
       method: 'POST',
       headers: { 'api-key': config.extensions.klaviyo.apiKey },
       json: true,
@@ -42,7 +42,7 @@ module.exports = ({ config, db }) => {
 
     let request = require('request')
     request({
-      url: config.extensions.klaviyo.apiUrl + '/list/' + config.extensions.klaviyo.listId + '/subscribe',
+      url: config.extensions.klaviyo.apiUrl + '/v2/list/' + config.extensions.klaviyo.listId + '/subscribe',
       method: 'DELETE',
       headers: { 'api-key': config.extensions.klaviyo.apiKey },
       json: true,
