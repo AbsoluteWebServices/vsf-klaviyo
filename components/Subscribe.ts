@@ -1,11 +1,11 @@
-import { required, email } from 'vuelidate/lib/validators'
+import { required, email } from "vuelidate/lib/validators";
 
 export const Subscribe = {
-  name: 'KlaviyoSubscribe',
-  data () {
+  name: "KlaviyoSubscribe",
+  data() {
     return {
-      email: ''
-    }
+      email: ""
+    };
   },
   validations: {
     email: {
@@ -14,20 +14,23 @@ export const Subscribe = {
     }
   },
   methods: {
-    klaviyoSubscribe (success?: Function, failure?: Function) {
+    klaviyoSubscribe(success?: Function, failure?: Function) {
       // argument omitted for validation purposes
       if (!this.$v.$invalid) {
-        this.$store.dispatch('klaviyo/subscribe', this.email).then(res => {
-          if (success) success(res)
-        }).catch(err => {
-          if (failure) failure(err)
-        }
-      )}
+        this.$store
+          .dispatch("klaviyo/subscribe", this.email)
+          .then(res => {
+            if (success) success(res);
+          })
+          .catch(err => {
+            if (failure) failure(err);
+          });
+      }
     }
   },
   computed: {
-    klaviyoSubscribed (): boolean {
-      return this.$store.state.klaviyo.isSubscribed
+    klaviyoSubscribed(): boolean {
+      return this.$store.state.klaviyo.isSubscribed;
     }
   }
-}
+};
