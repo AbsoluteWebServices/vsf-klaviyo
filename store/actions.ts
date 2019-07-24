@@ -4,6 +4,7 @@ import * as types from './mutation-types'
 import config from 'config'
 import rootStore from '@vue-storefront/core/store'
 import { mapCustomer, mapProduct, mapOrder, mapCart, mapLineItem, mapOrderedProduct } from '../helpers/mappers'
+import { cacheStorage } from '../'
 
 const encode = (json) => {
   return window.btoa(JSON.stringify(json))
@@ -11,7 +12,7 @@ const encode = (json) => {
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<KlaviyoState, any> = {
-  identify ({ commit }, user): Promise<Response> {
+  identify ({ commit }, { user, useCache = true }): Promise<Response> {
     let customer = mapCustomer(user)
     let request = {
       token: config.klaviyo.public_key,
@@ -29,6 +30,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
         mode: 'cors'
       }).then(res => {
         commit(types.SET_CUSTOMER, customer)
+        if (useCache) cacheStorage.setItem('customer', customer)
         resolve(res)
       }).catch(err => {
         reject(err)
@@ -36,10 +38,33 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
+  loadCustomerFromCache ({ commit }): Promise<Object> {
+    return new Promise ((resolve, reject) => {
+      cacheStorage.getItem('customer').then(customer => {
+        if (customer) {
+          commit(types.SET_CUSTOMER, customer)
+          resolve(customer)
+        } else {
+          resolve(null)
+        }
+      }).catch(() => reject())
+    })
+  },
+
+  resetCustomer ({ commit }, useCache = true) {
+    commit(types.SET_CUSTOMER, null)
+    commit(types.SET_NEWSLETTER_SUBSCRIBED, null)
+    commit(types.SET_WATCHING, [])
+    if (useCache) {
+      cacheStorage.removeItem('customer')
+      cacheStorage.removeItem('backInStockWatching')
+    }
+  },
+
   track ({ state }, { event, data }): Promise<Response> {
     if (state.customer === null) {
       return new Promise((resolve, reject) => {
-        reject()
+        reject({ message: 'No customer identified'})
       })
     }
 
@@ -114,7 +139,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  backInStockSubscribe ({ commit, getters }, { product, email, subscribeForNewsletter }): Promise<Response> {
+  backInStockSubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (!getters.isWatching(product.sku)) {
       let formData = new FormData()
 
@@ -134,11 +159,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
         }).then(res => {
           res.json().then(json => {
             if (json.success) {
-              commit(types.BACK_IN_STOCK_SUBSCRIBE, product.sku)
-              resolve(res)
+              commit(types.BACK_IN_STOCK_SUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
+              if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              resolve(json)
             }
             else {
-              reject(res)
+              reject(json)
             }
           })
         }).catch(err => {
@@ -148,7 +174,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  backInStockUnsubscribe ({ commit, getters }, { product, email, subscribeForNewsletter }): Promise<Response> {
+  backInStockUnsubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
       let formData = new FormData()
       
@@ -169,11 +195,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
         }).then(res => {
           res.json().then(json => {
             if (json.success) {
-              commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.sku)
-              resolve(res)
+              commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
+              if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              resolve(json)
             }
             else {
-              reject(res)
+              reject(json)
             }
           })
         }).catch(err => {
@@ -181,6 +208,37 @@ export const actions: ActionTree<KlaviyoState, any> = {
         })
       })
     }
+  },
+
+  loadWatchingList ({ commit, dispatch }, useCache = true): Promise<Response> {
+    return new Promise ((resolve, reject) => {
+      const loadFromServer = (): Promise<any> => {
+        return new Promise((resolve, reject) => {
+          reject({ message: 'Not Implemented'})
+        })
+      }
+
+      if (useCache) {
+        cacheStorage.getItem('backInStockWatching').then(backInStockWatching => {
+          if (backInStockWatching) {
+            commit(types.SET_WATCHING, backInStockWatching)
+            resolve(backInStockWatching)
+          } else {
+            loadFromServer().then(res => {
+              resolve(res)
+            }).catch(err => {
+              reject(err)
+            })
+          }
+        }).catch(() => reject())
+      } else {
+        loadFromServer().then(res => {
+          resolve(res)
+        }).catch(err => {
+          reject(err)
+        })
+      }
+    })
   },
 
   productViewed ({ dispatch }, product): Promise<Response> {

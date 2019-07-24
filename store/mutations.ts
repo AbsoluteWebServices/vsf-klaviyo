@@ -12,6 +12,9 @@ export const mutations: MutationTree<KlaviyoState> = {
   [types.NEWSLETTER_UNSUBSCRIBE] (state) {
     state.isSubscribed = false
   },
+  [types.SET_NEWSLETTER_SUBSCRIBED] (state, isSubscribed) {
+    state.isSubscribed = isSubscribed
+  },
   [types.BACK_IN_STOCK_SUBSCRIBE] (state, productSku) {
     state.backInStockWatching.push(productSku)
   },
@@ -20,5 +23,8 @@ export const mutations: MutationTree<KlaviyoState> = {
     if (index !== -1) {
       state.backInStockWatching.splice(index, 1)
     }
+  },
+  [types.SET_WATCHING] (state, backInStockWatching) {
+    state.backInStockWatching = backInStockWatching
   }
 }

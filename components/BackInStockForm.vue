@@ -22,7 +22,9 @@
       </label>
     </div>
     <div class="form-group">
-      <button class="button" type="submit">{{ $t('Notify me when available') }}</button>
+      <slot name="button">
+        <button class="button" type="submit">{{ $t('Notify me when available') }}</button>
+      </slot>
     </div>
   </form>
 </template>
@@ -31,7 +33,7 @@
 import rootStore from '@vue-storefront/core/store'
 
 export default {
-  name: 'BackInStock',
+  name: 'BackInStockForm',
   props: {
     product: {
       type: Object,
@@ -61,8 +63,12 @@ export default {
         product: this.product,
         email: this.email,
         subscribeForNewsletter: this.subscribe
-      }).then(res => {
-        this.$emit('submit')
+      }).then(json => {
+        if (json.success) {
+          this.$emit('success', json)
+        } else {
+          this.$emit('error', json)
+        }
       })
     }
   }

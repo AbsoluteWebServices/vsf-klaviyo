@@ -2,8 +2,11 @@ import { VueStorefrontModule, VueStorefrontModuleConfig } from '@vue-storefront/
 import { afterRegistration } from './hooks/afterRegistration'
 import { module } from './store'
 import routes from './router'
+import { initCacheStorage } from '@vue-storefront/core/helpers/initCacheStorage'
 
-const KEY = 'klaviyo'
+export const KEY = 'klaviyo'
+
+export const cacheStorage = initCacheStorage(KEY)
 
 const moduleConfig: VueStorefrontModuleConfig = {
   key: KEY,

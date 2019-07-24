@@ -2,8 +2,14 @@ import rootStore from '@vue-storefront/core/store'
 
 export function afterRegistration({ Vue, config, store, isServer }) {
   if (!isServer && config.klaviyo && config.klaviyo.public_key) {
+    store.dispatch('klaviyo/loadCustomerFromCache')
+
     Vue.prototype.$bus.$on('user-after-loggedin', receivedData => {
-      store.dispatch('klaviyo/identify', receivedData)
+      store.dispatch('klaviyo/identify', { user: receivedData })
+    })
+
+    Vue.prototype.$bus.$on('user-before-logout', () => {
+      store.dispatch('klaviyo/resetCustomer')
     })
 
     Vue.prototype.$bus.$on('product-after-single', event => {
