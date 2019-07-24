@@ -37,6 +37,20 @@ Add following settings to your config file.
   },
 ```
 
+If you want to use diffrent list for diffrent store (multilang lists), below **listId** add:
+```json
+"multistoreListIds": {
+  "es": "es_list_id",
+  "eu": "eu_list_id",
+  "it": "it_list_id",
+  "fr": "fr_list_id",
+  "us": "us_list_id",
+  "mx": "mx_list_id",
+  "de": "de_list_id",
+  "uk": "uk_list_id"
+}
+```
+
 Add Subscribe/Unsubscripe components as mixins
 
 ```
@@ -79,4 +93,18 @@ Add the config to your api config.
     "klaviyo",
     ...
   ],
+```
+
+For multistore, inside extensions.klaviyo, add same **multistoreListIds** us above:
+```json
+"multistoreListIds": {
+  "es": "es_list_id",
+  "eu": "eu_list_id",
+  "it": "it_list_id",
+  "fr": "fr_list_id",
+  "us": "us_list_id",
+  "mx": "mx_list_id",
+  "de": "de_list_id",
+  "uk": "uk_list_id"
+}
 ```
