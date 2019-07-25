@@ -64,6 +64,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   track ({ state }, { event, data }): Promise<Response> {
     if (state.customer === null) {
       return new Promise((resolve, reject) => {
+        console.warn('No customer identified')
         reject({ message: 'No customer identified'})
       })
     }
@@ -242,19 +243,19 @@ export const actions: ActionTree<KlaviyoState, any> = {
   },
 
   productViewed ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Viewed Product', data: mapProduct(product) })
+    return dispatch('track', { event: 'Viewed Product', data: mapProduct(product) }).catch(err => {})
   },
 
   productAddedToCart ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Added to Cart Product', data: mapLineItem(product) })
+    return dispatch('track', { event: 'Added to Cart Product', data: mapLineItem(product) }).catch(err => {})
   },
 
   productRemovedFromCart ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Removed from Cart Product', data: mapLineItem(product) })
+    return dispatch('track', { event: 'Removed from Cart Product', data: mapLineItem(product) }).catch(err => {})
   },
 
   checkoutStarted ({ dispatch }, cart): Promise<Response> {
-    return dispatch('track', { event: 'Started Checkout', data: mapCart(cart) })
+    return dispatch('track', { event: 'Started Checkout', data: mapCart(cart) }).catch(err => {})
   },
 
   orderPlaced ({ dispatch }, order): Promise<Response> {
@@ -264,13 +265,11 @@ export const actions: ActionTree<KlaviyoState, any> = {
           dispatch('productOrdered', { order, product })
         })
         resolve(res)
-      }).catch(err => {
-        reject(err)
-      })
+      }).catch(err => {})
     })
   },
 
   productOrdered ({ dispatch }, { order, product }): Promise<Response> {
-    return dispatch('track', { event: 'Ordered Product', data: mapOrderedProduct(order, product) })
+    return dispatch('track', { event: 'Ordered Product', data: mapOrderedProduct(order, product) }).catch(err => {})
   }
 }
