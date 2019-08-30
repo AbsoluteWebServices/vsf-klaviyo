@@ -4,15 +4,16 @@ let routes = [
   {
     name: 'klaviyo-checkout',
     path: '/klaviyo/restore-checkout/:token/:cartId',
-    redirect: to => {
+    beforeEnter: (to, from, next) => {
       const { params } = to
 
       Vue.prototype.$db.usersCollection.setItem('current-token', params.token)
       Vue.prototype.$db.cartsCollection.setItem('current-cart', [])
       Vue.prototype.$db.cartsCollection.setItem('current-cart-token', params.cartId)
 
-      return { name: 'checkout' }
-    }
+      next({ name: 'checkout' })
+    },
+    component: null
   }
 ]
 
