@@ -22,7 +22,7 @@ export const registerModules: VueStorefrontModule[] = [
 ]
 ```
 
-Add following settings to your config file.
+Add following settings to your config file. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
 
 ```json
   "klaviyo": {
@@ -33,6 +33,12 @@ Add following settings to your config file.
       "backInStock": "https://a.klaviyo.com/onsite/components/back-in-stock/subscribe"
     },
     "listId": "__NEWSLETTER_LIST_ID__",
+    "multistoreListIds": {
+      "es": "__ES_LIST_ID__",
+      "eu": "__EU_LIST_ID__",
+      "it": "__IT_LIST_ID__",
+      ...
+    },
     "platform": "magento_two"
   },
 ```
@@ -64,14 +70,20 @@ Install additional extension for `vue-storefront-api`:
 cp -f ./vue-storefront/src/modules/vsf-klaviyo/API/klaviyo ./vue-storefront-api/src/api/extensions/
 ```
 
-Add the config to your api config.
+Add the config to your api config. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
 
 ```json
   "extensions":{
     "klaviyo": {
       "apiKey": "__YOUR_PRIVATE_KEY__",
       "apiUrl": "https://a.klaviyo.com/api",
-      "listId": "__NEWSLETTER_LIST_ID__"
+      "listId": "__NEWSLETTER_LIST_ID__",
+      "multistoreListIds": {
+        "es": "__ES_LIST_ID__",
+        "eu": "__EU_LIST_ID__",
+        "it": "__IT_LIST_ID__",
+        ...
+      }
     },
     ...
   },
