@@ -21,8 +21,17 @@ export const Subscribe = {
           if (success) success(res)
         }).catch(err => {
           if (failure) failure(err)
-        }
-      )}
+        })
+      }
+    },
+    klaviyoSubscribeAdvanced (RequestData?: Object, success?: Function, failure?: Function) {
+      if (!this.$v.$invalid) {
+        this.$store.dispatch('klaviyo/subscribeAdvanced', RequestData).then(res => {
+          if (success) success(res)
+        }).catch(err => {
+          if (failure) failure(err)
+        })
+      }
     }
   },
   computed: {

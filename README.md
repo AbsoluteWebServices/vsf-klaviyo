@@ -24,12 +24,28 @@ export const registerModules: VueStorefrontModule[] = [
 
 Add following settings to your config file. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
 
+`subscribeAdvanced` - allow custom profile properties and custom list ID
+
+```
+// Example request data
+{
+  '$source': 'Source',
+  first_name: 'Name',
+  last_name: 'Last Name',
+  email: 'Email',
+  'Custom Property': 'Custom property 1',
+  'Custom Property 2': 'Custom property 2',
+  listId: '__XXXX__'
+}
+```
+
 ```json
   "klaviyo": {
     "public_key": "__YOUR_PUBLIC_KEY__",
     "endpoint": {
       "api": "https://a.klaviyo.com/api",
       "subscribe": "http://localhost:8080/api/ext/klaviyo/subscribe",
+      "subscribeAdvanced": "http://localhost:8080/api/ext/klaviyo/subscribe-advanced",
       "backInStock": "https://a.klaviyo.com/onsite/components/back-in-stock/subscribe"
     },
     "listId": "__NEWSLETTER_LIST_ID__",
@@ -56,8 +72,15 @@ export default {
 }
 ```
 
+### Simple subscribe
 ```html
 <form @submit.prevent="klaviyoSubscribe(onSuccess, onFailure)">
+<!-- Your subscribe form -->
+</form>
+```
+### Advanced 
+```html
+<form @submit.prevent="klaviyoSubscribeAdvanced(requestData, onSuccess, onFailure)">
 <!-- Your subscribe form -->
 </form>
 ```

@@ -60,6 +60,46 @@ module.exports = ({ config, db }) => {
     })
   })
 
+  klaviyoApi.post('/subscribe-advanced', (req, res) => {
+    let userData = req.body
+
+    if (!userData.email) {
+      apiStatus(res, 'Invalid e-mail provided!', 500)
+      return
+    }
+
+    let listId = userData.listId
+
+    if (config.storeViews.multistore === true) {
+      if (!userData.storeCode) {
+        apiStatus(res, 'Provide storeCode!', 500)
+        return
+      }
+      listId = pickProperListId(res, userData.storeCode)
+    } else {
+      listId = pickProperListId(res)
+    }
+
+    let request = require('request')
+
+    let profile = userData
+    delete profile.listId
+
+    request({
+      url: config.extensions.klaviyo.apiUrl + '/v2/list/' + listId + '/subscribe',
+      method: 'POST',
+      headers: { 'api-key': config.extensions.klaviyo.apiKey },
+      json: true,
+      body: { profiles: [ profile ] }
+    }, (error, response, body) => {
+      if (error) {
+        apiStatus(res, error, 500)
+      } else {
+        apiStatus(res, body, 200)
+      }
+    })
+  })
+
   /**
    * DELETE delete an user
    */
