@@ -21,6 +21,45 @@ module.exports = ({ config, db }) => {
   }
 
   /**
+   * GET Subscription status
+   */
+  klaviyoApi.get('/subscribe', (req, res) => {
+    let email = req.query.email
+    if (!email) {
+      apiStatus(res, 'Invalid e-mail provided!', 500)
+      return
+    }
+
+    let storeCode = req.query.storeCode
+    let listId = null
+
+    if (config.storeViews.multistore === true) {
+      if (!storeCode) {
+        apiStatus(res, 'Provide storeCode!', 500)
+        return
+      }
+      listId = pickProperListId(res, storeCode)
+    } else {
+      listId = pickProperListId(res)
+    }
+
+    let request = require('request')
+    request({
+      url: config.extensions.klaviyo.apiUrl + '/v2/list/' + listId + '/subscribe',
+      method: 'GET',
+      headers: { 'api-key': config.extensions.klaviyo.apiKey },
+      json: true,
+      body: { emails: [ email ] }
+    }, (error, response, body) => {
+      if (error) {
+        apiStatus(res, error, 500)
+      } else {
+        apiStatus(res, body, 200)
+      }
+    })
+  })
+
+  /**
    * POST Subscribe to List
    */
   klaviyoApi.post('/subscribe', (req, res) => {

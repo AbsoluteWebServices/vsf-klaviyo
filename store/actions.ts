@@ -6,9 +6,11 @@ import fetch from 'isomorphic-fetch'
 import rootStore from '@vue-storefront/core/store'
 import { mapCustomer, mapProduct, mapOrder, mapCart, mapLineItem, mapOrderedProduct } from '../helpers/mappers'
 import { cacheStorage } from '../'
+import { processURLAddress } from '@vue-storefront/core/helpers'
+import { Base64 } from 'theme/helpers/webtoolkit.base64.js'
 
 const encode = (json) => {
-  return window.btoa(JSON.stringify(json))
+  return Base64.encode(JSON.stringify(json)) // ERROR: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
 }
 
 // it's a good practice for all actions to return Promises with effect of their execution
@@ -19,11 +21,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       token: config.klaviyo.public_key,
       properties: customer
     }
-
-    let url = config.klaviyo.endpoint.api
-    url += '/identify'
-    url = new URL(url),
-    url.searchParams.append('data', encode(request))
+    let url = processURLAddress(config.klaviyo.endpoint.api) + '/identify?data=' + encode(request)
 
     return new Promise((resolve, reject) => {
       fetch(url, {
@@ -76,11 +74,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       customer_properties : state.customer,
       properties : data
     }
-
-    let url = config.klaviyo.endpoint.api
-    url += '/track'
-    url = new URL(url),
-    url.searchParams.append('data', encode(request))
+    let url = processURLAddress(config.klaviyo.endpoint.api) + '/track?data=' + encode(request)
 
     return new Promise((resolve, reject) => {
       fetch(url, {
@@ -94,10 +88,38 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
+  status ({ commit, state }, email): Promise<Boolean> {
+    return new Promise((resolve, reject) => {
+      fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors'
+      }).then(res => res.json())
+        .then(res => {
+          if (Array.isArray(res.result) && res.result.length > 0) {
+            commit(types.NEWSLETTER_SUBSCRIBE)
+            if (!state.customer) {
+              let customer = mapCustomer({ email })
+              commit(types.SET_CUSTOMER, customer)
+            }
+            resolve(true)
+          } else {
+            commit(types.NEWSLETTER_UNSUBSCRIBE)
+            if (!rootStore.state.user.current || !rootStore.state.user.current.email) {
+              commit(types.SET_CUSTOMER, null)
+            }
+            resolve(false)
+          }
+        }).catch(err => {
+          reject(err)
+        })
+    })
+  },
+
   subscribe ({ commit, state }, email): Promise<Response> {
     if (!state.isSubscribed) {
       return new Promise((resolve, reject) => {
-        fetch(config.klaviyo.endpoint.subscribe, {
+        fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           mode: 'cors',
@@ -121,7 +143,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   unsubscribe ({ commit, state }, email): Promise<Response> {
     if (state.isSubscribed) {
       return new Promise((resolve, reject) => {
-        fetch(config.klaviyo.endpoint.subscribe, {
+        fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           mode: 'cors',
@@ -154,7 +176,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       formData.append('subscribe_for_newsletter', subscribeForNewsletter)
 
       return new Promise((resolve, reject) => {
-        fetch(config.klaviyo.endpoint.backInStock, {
+        fetch(processURLAddress(config.klaviyo.endpoint.backInStock), {
           method: 'POST',
           mode: 'cors',
           body: formData
@@ -189,7 +211,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       formData.append('subscribe_for_newsletter', subscribeForNewsletter)
 
       return new Promise((resolve, reject) => {
-        fetch(config.klaviyo.endpoint.subscribe, {
+        fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           mode: 'cors',

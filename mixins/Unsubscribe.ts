@@ -1,18 +1,26 @@
-export const Unsubscribe = {
+import { required, email } from 'vuelidate/lib/validators'
+
+export default {
   name: 'KlaviyoUnsubscribe',
+  data () {
+    return {
+      email: ''
+    }
+  },
+  validations: {
+    email: {
+      required,
+      email
+    }
+  },
   methods: {
-    klaviyoUnsubscribe () {
+    unsubscribe () {
       this.$store.dispatch('klaviyo/unsubscribe', this.email).then(res => {
         this.$emit('unsubscribed', res)
       }).catch(err => 
         this.$emit('unsubscription-error', err)
       )
     } 
-  },
-  computed: {
-    klaviyoSubscribed () {
-      return this.$store.state.klaviyo.isSubscribed
-    }
   }
 }
   

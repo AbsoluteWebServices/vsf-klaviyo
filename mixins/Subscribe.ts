@@ -1,6 +1,6 @@
 import { required, email } from 'vuelidate/lib/validators'
 
-export const Subscribe = {
+export default {
   name: 'KlaviyoSubscribe',
   data () {
     return {
@@ -14,7 +14,7 @@ export const Subscribe = {
     }
   },
   methods: {
-    klaviyoSubscribe (success?: Function, failure?: Function) {
+    subscribe (success?: Function, failure?: Function) {
       // argument omitted for validation purposes
       if (!this.$v.$invalid) {
         this.$store.dispatch('klaviyo/subscribe', this.email).then(res => {
@@ -32,11 +32,6 @@ export const Subscribe = {
           if (failure) failure(err)
         })
       }
-    }
-  },
-  computed: {
-    klaviyoSubscribed (): boolean {
-      return this.$store.state.klaviyo.isSubscribed
     }
   }
 }
