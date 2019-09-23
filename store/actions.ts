@@ -7,7 +7,7 @@ import rootStore from '@vue-storefront/core/store'
 import { mapCustomer, mapProduct, mapOrder, mapCart, mapLineItem, mapOrderedProduct } from '../helpers/mappers'
 import { cacheStorage } from '../'
 import { processURLAddress } from '@vue-storefront/core/helpers'
-import { Base64 } from 'theme/helpers/webtoolkit.base64.js'
+import { Base64 } from '../helpers/webtoolkit.base64.js'
 
 const encode = (json) => {
   return Base64.encode(JSON.stringify(json)) // ERROR: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
