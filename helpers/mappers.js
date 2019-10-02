@@ -103,7 +103,7 @@ export const mapOrder = (order) => {
   }
 
   let result = {
-    '$event_id': order.id.toString(),
+    '$event_id': order.order_id.toString(),
     '$value': subtotal,
     'ItemNames': products.map(prod => prod.ProductName),
     'Categories': categories,
