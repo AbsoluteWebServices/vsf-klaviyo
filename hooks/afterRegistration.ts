@@ -1,11 +1,24 @@
 import rootStore from '@vue-storefront/core/store'
 
-export function afterRegistration({ Vue, config, store, isServer }) {
+export async function afterRegistration({ Vue, config, store, isServer }) {
   if (!isServer && config.klaviyo && config.klaviyo.public_key) {
-    store.dispatch('klaviyo/loadCustomerFromCache')
+    await store.dispatch('klaviyo/loadCustomerFromCache')
+
+    if (!store.state.klaviyo.customer) {
+      const receivedData = await Vue.prototype.$db.checkoutFieldsCollection.getItem('personal-details')
+      if (receivedData) {
+        store.dispatch('klaviyo/identify', { personalDetails: receivedData })
+      }
+    }
 
     Vue.prototype.$bus.$on('user-after-loggedin', receivedData => {
       store.dispatch('klaviyo/identify', { user: receivedData })
+    })
+
+    Vue.prototype.$bus.$on('checkout-after-personalDetails', receivedData => {
+      if (!store.state.klaviyo.customer && receivedData.hasOwnProperty('email')) {
+        store.dispatch('klaviyo/identify', { personalDetails: receivedData })
+      }
     })
 
     Vue.prototype.$bus.$on('user-before-logout', () => {

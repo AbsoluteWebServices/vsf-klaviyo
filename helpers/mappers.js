@@ -2,6 +2,22 @@ import rootStore from '@vue-storefront/core/store'
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers'
 import { router } from '@vue-storefront/core/app'
 
+export const mapPersonalDetails = (details) => {
+  let customer = {
+    '$email': details.emailAddress
+  }
+
+  if (details.firstName) {
+    customer['$first_name'] = details.firstName
+  }
+
+  if (details.lastName) {
+    customer['$last_name'] = details.lastName
+  }
+
+  return customer
+}
+
 export const mapCustomer = (user) => {
   let customer = {
     '$email': user.email
@@ -62,9 +78,9 @@ export const mapLineItem = (product) => {
 }
 
 export const mapCart = (cart) => {
-  let token = rootStore.getters['user/getUserToken']
+  let userToken = rootStore.getters['user/getUserToken']
   let cartId = cart.cartServerToken
-  let link = router.resolve({ name: 'checkout', query: { userToken: token } })
+  let link = router.resolve({ name: 'checkout', query: { userToken, cartId } })
   let products = []
 
   for (let i = 0; i < cart.cartItems.length; i++) {
