@@ -127,7 +127,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return new Promise((resolve, reject) => {
       fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email), {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
         mode: 'cors'
       }).then(res => res.json())
         .then(res => {
@@ -149,7 +152,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
           mode: 'cors',
           body: JSON.stringify({ email })
         }).then(res => {
@@ -172,7 +178,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
           mode: 'cors',
           body: JSON.stringify({ email })
         }).then(res => {
@@ -205,6 +214,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.backInStock), {
           method: 'POST',
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
           mode: 'cors',
           body: formData
         }).then(res => {
@@ -240,7 +253,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
           mode: 'cors',
           body: formData
         }).then(res => {
