@@ -108,17 +108,6 @@ module.exports = ({ config, db }) => {
     }
 
     let listId = userData.listId
-
-    if (config.storeViews.multistore === true) {
-      if (!userData.storeCode) {
-        apiStatus(res, 'Provide storeCode!', 500)
-        return
-      }
-      listId = pickProperListId(res, userData.storeCode)
-    } else {
-      listId = pickProperListId(res)
-    }
-
     let request = require('request')
 
     let profile = userData
