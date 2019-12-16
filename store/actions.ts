@@ -175,7 +175,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   subscribeAdvanced ({ commit, dispatch, state }, requestData) : Promise<Response> {
     return new Promise((resolve, reject) => {
-      fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
+      fetch(processURLAddress(config.klaviyo.endpoint.subscribeAdvanced), {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
