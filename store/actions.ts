@@ -173,6 +173,28 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
+  subscribeAdvanced ({ commit, dispatch, state }, requestData) : Promise<Response> {
+    return new Promise((resolve, reject) => {
+      fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        body: JSON.stringify(requestData)
+      }).then(res => {
+        if (!state.customer) {
+          return dispatch('identify', { user: requestData.email })
+        } else {
+          resolve(res)
+        }
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+
   unsubscribe ({ commit, state }, email): Promise<Response> {
     if (state.isSubscribed) {
       return new Promise((resolve, reject) => {
