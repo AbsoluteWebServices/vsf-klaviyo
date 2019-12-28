@@ -162,7 +162,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
           commit(types.NEWSLETTER_SUBSCRIBE)
 
           if (!state.customer) {
-            return dispatch('identify', { user: { email } })
+             dispatch('identify', { user: { email } }).then((identify) => resolve(identify))
           } else {
             resolve(res)
           }
