@@ -6,9 +6,8 @@ import fetch from 'isomorphic-fetch'
 import rootStore from '@vue-storefront/core/store'
 import * as mappers from '../helpers/mappers'
 import { cacheStorage } from '../'
-import { processURLAddress } from '@vue-storefront/core/helpers'
+import { processURLAddress, onlineHelper } from '@vue-storefront/core/helpers'
 import { Base64 } from '../helpers/webtoolkit.base64.js'
-import { onlineHelper } from '@vue-storefront/core/helpers'
 
 const encode = (json) => {
   return Base64.encode(JSON.stringify(json)) // ERROR: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
@@ -26,14 +25,15 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   identify ({ commit, dispatch }, { user = null, personalDetails = null, useCache = true }): Promise<Response> {
     let customer
+
     if (user) {
       customer = mappers.mapCustomer(user)
-    } else if(personalDetails) {
+    } else if (personalDetails) {
       customer = mappers.mapPersonalDetails(personalDetails)
     } else {
       throw new Error('User details are required')
     }
-    
+
     let request = {
       token: config.klaviyo.public_key,
       properties: customer
@@ -62,7 +62,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   },
 
   loadCustomerFromCache ({ commit }): Promise<Object> {
-    return new Promise ((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       cacheStorage.getItem('customer').then(customer => {
         if (customer) {
           commit(types.SET_CUSTOMER, customer)
@@ -96,6 +96,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
         cacheStorage.getItem('trackQueue').then(items => {
           let newItems = items || []
+
           newItems.push({ event, data, time })
           cacheStorage.setItem('trackQueue', newItems)
         })
@@ -104,9 +105,9 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
     let request = {
       token: config.klaviyo.public_key,
-      event : event,
-      customer_properties : state.customer,
-      properties : data,
+      event: event,
+      customer_properties: state.customer,
+      properties: data,
       time
     }
     let url = processURLAddress(config.klaviyo.endpoint.api) + '/track?data=' + encode(request)
@@ -127,7 +128,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return new Promise((resolve, reject) => {
       fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email), {
         method: 'GET',
-        headers: { 
+        headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
@@ -152,7 +153,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'POST',
-          headers: { 
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
@@ -162,7 +163,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
           commit(types.NEWSLETTER_SUBSCRIBE)
 
           if (!state.customer) {
-             dispatch('identify', { user: { email } }).then((identify) => resolve(identify))
+            dispatch('identify', { user: { email } }).then((identify) => resolve(identify))
           } else {
             resolve(res)
           }
@@ -184,8 +185,8 @@ export const actions: ActionTree<KlaviyoState, any> = {
         mode: 'cors',
         body: JSON.stringify(requestData)
       }).then(res => {
-        if (!state.customer) {
-          return dispatch('identify', { user: requestData.email })
+        if (!state.customer && requestData.hasOwnProperty('email')) {
+          dispatch('identify', { user: { email: requestData.email } }).then((identify) => resolve(identify))
         } else {
           resolve(res)
         }
@@ -200,7 +201,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
-          headers: { 
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
@@ -236,7 +237,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.backInStock), {
           method: 'POST',
-          headers: { 
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
@@ -248,8 +249,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
               commit(types.BACK_IN_STOCK_SUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
               if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
               resolve(json)
-            }
-            else {
+            } else {
               reject(json)
             }
           })
@@ -263,7 +263,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   backInStockUnsubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
       let formData = new FormData()
-      
+
       formData.append('a', config.klaviyo.public_key)
       formData.append('email', email)
       formData.append('g', config.klaviyo.listId)
@@ -275,7 +275,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
           method: 'DELETE',
-          headers: { 
+          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
           },
@@ -287,8 +287,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
               commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
               if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
               resolve(json)
-            }
-            else {
+            } else {
               reject(json)
             }
           })
@@ -300,7 +299,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   },
 
   loadWatchingList ({ commit, dispatch }, useCache = true): Promise<Response> {
-    return new Promise ((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const loadFromServer = (): Promise<any> => {
         return new Promise((resolve, reject) => {
           reject({ message: 'Not Implemented'})
