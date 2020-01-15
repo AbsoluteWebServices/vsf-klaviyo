@@ -23,7 +23,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  identify ({ commit, dispatch }, { user = null, personalDetails = null, useCache = true }): Promise<Response> {
+  identify ({ commit, dispatch }, { user = null, personalDetails = null, useCache = true, additionalData = {} }): Promise<Response> {
     let customer
 
     if (user) {
@@ -36,7 +36,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
     let request = {
       token: config.klaviyo.public_key,
-      properties: customer
+      properties: Object.assign(customer, additionalData)
     }
     let url = processURLAddress(config.klaviyo.endpoint.api) + '/identify?data=' + encode(request)
 
