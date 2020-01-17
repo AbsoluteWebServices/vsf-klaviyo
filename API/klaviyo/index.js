@@ -107,11 +107,8 @@ module.exports = ({ config, db }) => {
       return
     }
 
-    let listId = userData.listId
+    let { listId, ...profile } = userData
     let request = require('request')
-
-    let profile = userData
-    delete profile.listId
 
     request({
       url: config.extensions.klaviyo.apiUrl + '/v2/list/' + listId + '/subscribe',
