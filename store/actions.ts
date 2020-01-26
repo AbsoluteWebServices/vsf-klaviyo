@@ -126,7 +126,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   status ({ commit, state }, email): Promise<Boolean> {
     return new Promise((resolve, reject) => {
-      fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email), {
+      fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email) + '&storeCode=' + config.defaultStoreCode, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -158,10 +158,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
             'Content-Type': 'application/json'
           },
           mode: 'cors',
-          body: JSON.stringify({ email })
+          body: JSON.stringify({
+            email: email,
+            storeCode: config.defaultStoreCode
+          })
         }).then(res => {
           commit(types.NEWSLETTER_SUBSCRIBE)
-
           if (!state.customer) {
             dispatch('identify', { user: { email } }).then((identify) => resolve(identify))
           } else {
