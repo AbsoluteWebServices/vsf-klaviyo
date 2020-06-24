@@ -1,0 +1,18 @@
+{
+  "klaviyo": {
+    "public_key": "__YOUR_PUBLIC_KEY__",
+    "endpoint": {
+      "api": "https://a.klaviyo.com/api",
+      "subscribe": "http://localhost:8080/api/ext/klaviyo/subscribe",
+      "subscribeAdvanced": "http://localhost:8080/api/ext/klaviyo/subscribe-advanced",
+      "backInStock": "https://a.klaviyo.com/onsite/components/back-in-stock/subscribe"
+    },
+    "listId": "__NEWSLETTER_LIST_ID__",
+    "multistoreListIds": {
+      "es": "__ES_LIST_ID__",
+      "eu": "__EU_LIST_ID__",
+      "it": "__IT_LIST_ID__"
+    },
+    "platform": "magento_two"
+  }
+}

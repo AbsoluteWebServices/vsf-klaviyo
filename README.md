@@ -1,4 +1,4 @@
-# Vue Storefront Klaviyo Extension
+# Vue Storefront Klaviyo Module
 
 The Klaviyo integration module for [vue-storefront](https://github.com/DivanteLtd/vue-storefront).
 
@@ -7,61 +7,28 @@ The Klaviyo integration module for [vue-storefront](https://github.com/DivanteLt
 By hand (preferer):
 
 ```shell
-git clone git@github.com:AbsoluteWebServices/vsf-klaviyo.git ./vue-storefront/src/modules/
+git clone git@github.com:AbsoluteWebServices/vsf-klaviyo.git ./vue-storefront/src/modules/vsf-klaviyo
 ```
 
-Registration the Klaviyo module. Go to `./vue-storefront/src/modules/index.ts`
+Registration the Klaviyo module. Go to `./vue-storefront/src/modules/client.ts`
 
 ```js
 ...
-import { Klaviyo } from './vsf-klaviyo';
+import { KlaviyoModule } from './vsf-klaviyo';
 
-export const registerModules: VueStorefrontModule[] = [
+export function registerClientModules () {
   ...
-  Klaviyo
-]
-```
-
-Add following settings to your config file. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
-
-`subscribeAdvanced` - allow custom profile properties and custom list ID
-
-```
-// Example request data
-{
-  '$source': 'Source',
-  first_name: 'Name',
-  last_name: 'Last Name',
-  email: 'Email',
-  'Custom Property': 'Custom property 1',
-  'Custom Property 2': 'Custom property 2',
-  listId: '__XXXX__'
+  registerModule(KlaviyoModule)
 }
 ```
 
-```json
-  "klaviyo": {
-    "public_key": "__YOUR_PUBLIC_KEY__",
-    "endpoint": {
-      "api": "https://a.klaviyo.com/api",
-      "subscribe": "http://localhost:8080/api/ext/klaviyo/subscribe",
-      "subscribeAdvanced": "http://localhost:8080/api/ext/klaviyo/subscribe-advanced",
-      "backInStock": "https://a.klaviyo.com/onsite/components/back-in-stock/subscribe"
-    },
-    "listId": "__NEWSLETTER_LIST_ID__",
-    "multistoreListIds": {
-      "es": "__ES_LIST_ID__",
-      "eu": "__EU_LIST_ID__",
-      "it": "__IT_LIST_ID__",
-      ...
-    },
-    "platform": "magento_two"
-  },
-```
+Add settings from local.json to your config file. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
+
+## Usage
 
 Add Subscribe/Unsubscripe components as mixins
 
-```
+```js
 ...
 import { Subscribe } from 'src/modules/vsf-klaviyo/components/Subscribe'
 
@@ -73,45 +40,35 @@ export default {
 ```
 
 ### Simple subscribe
+
 ```html
 <form @submit.prevent="klaviyoSubscribe(onSuccess, onFailure)">
 <!-- Your subscribe form -->
 </form>
 ```
-### Advanced 
+
+### Advanced
+
+`klaviyoSubscribeAdvanced` - allow custom profile properties and custom list ID
 ```html
 <form @submit.prevent="klaviyoSubscribeAdvanced(requestData, onSuccess, onFailure)">
 <!-- Your subscribe form -->
 </form>
 ```
 
+Example request data
+```js
+{
+  '$source': 'Source',
+  first_name: 'Name',
+  last_name: 'Last Name',
+  email: 'Email',
+  'Custom Property': 'Custom property 1',
+  'Custom Property 2': 'Custom property 2',
+  listId: '__XXXX__'
+}
+```
+
 ## Klaviyo API extension
 
-Install additional extension for `vue-storefront-api`:
-
-```shell
-cp -f ./vue-storefront/src/modules/vsf-klaviyo/API/klaviyo ./vue-storefront-api/src/api/extensions/
-```
-
-Add the config to your api config. If you want to use different lists for multistore you need to add all list ids to **multistoreListIds**.
-
-```json
-  "extensions":{
-    "klaviyo": {
-      "apiKey": "__YOUR_PRIVATE_KEY__",
-      "apiUrl": "https://a.klaviyo.com/api",
-      "listId": "__NEWSLETTER_LIST_ID__",
-      "multistoreListIds": {
-        "es": "__ES_LIST_ID__",
-        "eu": "__EU_LIST_ID__",
-        "it": "__IT_LIST_ID__",
-        ...
-      }
-    },
-    ...
-  },
-  "registeredExtensions": [
-    "klaviyo",
-    ...
-  ],
-```
+Install additional extension for `vue-storefront-api`: [vsf-api-klaviyo](https://github.com/AbsoluteWebServices/vsf-api-klaviyo).
