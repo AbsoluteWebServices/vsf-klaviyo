@@ -17,10 +17,9 @@ export default {
     unsubscribe () {
       this.$store.dispatch('klaviyo/unsubscribe', this.email).then(res => {
         this.$emit('unsubscribed', res)
-      }).catch(err => 
+      }).catch(err =>
         this.$emit('unsubscription-error', err)
       )
-    } 
+    }
   }
 }
-  

@@ -6,9 +6,9 @@ import { state } from './state'
 import KlaviyoState from '../types/KlaviyoState'
 
 export const module: Module<KlaviyoState, any> = {
-    namespaced: true,
-    mutations,
-    actions,
-    getters,
-    state
+  namespaced: true,
+  mutations,
+  actions,
+  getters,
+  state
 }

@@ -1,16 +1,14 @@
-import { VueStorefrontModule, VueStorefrontModuleConfig } from '@vue-storefront/core/lib/module'
-import { afterRegistration } from './hooks/afterRegistration'
+import { StorefrontModule } from '@vue-storefront/core/lib/modules'
+import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 import { module } from './store'
-import { initCacheStorage } from '@vue-storefront/core/helpers/initCacheStorage'
+import { afterRegistration } from './hooks/afterRegistration'
 
 export const KEY = 'klaviyo'
 
-export const cacheStorage = initCacheStorage(KEY)
+export const KlaviyoModule: StorefrontModule = function ({ store, appConfig }) {
+  StorageManager.init(KEY)
 
-const moduleConfig: VueStorefrontModuleConfig = {
-  key: KEY,
-  store: { modules: [{ key: KEY, module }] },
-  afterRegistration
+  store.registerModule(KEY, module)
+
+  afterRegistration(appConfig, store)
 }
-
-export const Klaviyo = new VueStorefrontModule(moduleConfig)

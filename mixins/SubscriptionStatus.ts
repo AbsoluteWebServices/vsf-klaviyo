@@ -1,5 +1,4 @@
 import { required, email } from 'vuelidate/lib/validators'
-import config from 'config'
 
 export default {
   name: 'KlaviyoSubscriptionStatus',

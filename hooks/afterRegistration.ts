@@ -1,41 +1,44 @@
 import rootStore from '@vue-storefront/core/store'
+import { isServer } from '@vue-storefront/core/helpers'
+import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-export async function afterRegistration({ Vue, config, store, isServer }) {
-  if (!isServer && config.klaviyo && config.klaviyo.public_key) {
+export async function afterRegistration (appConfig, store) {
+  if (!isServer && appConfig.klaviyo && appConfig.klaviyo.public_key) {
     await store.dispatch('klaviyo/loadCustomerFromCache')
 
     if (!store.state.klaviyo.customer) {
-      const receivedData = await Vue.prototype.$db.checkoutFieldsCollection.getItem('personal-details')
+      const receivedData = await StorageManager.get('checkout').getItem('personal-details')
       if (receivedData) {
         store.dispatch('klaviyo/identify', { personalDetails: receivedData })
       }
     }
 
-    Vue.prototype.$bus.$on('user-after-loggedin', receivedData => {
+    EventBus.$on('user-after-loggedin', receivedData => {
       store.dispatch('klaviyo/identify', { user: receivedData })
     })
 
-    Vue.prototype.$bus.$on('checkout-after-personalDetails', receivedData => {
+    EventBus.$on('checkout-after-personalDetails', receivedData => {
       if (!store.state.klaviyo.customer && receivedData.hasOwnProperty('email')) {
         store.dispatch('klaviyo/identify', { personalDetails: receivedData })
       }
     })
 
-    Vue.prototype.$bus.$on('user-before-logout', () => {
+    EventBus.$on('user-before-logout', () => {
       store.dispatch('klaviyo/resetCustomer')
     })
 
-    Vue.prototype.$bus.$on('product-after-single', event => {
+    EventBus.$on('product-after-single', event => {
       store.dispatch('klaviyo/productViewed', event.product)
     })
 
-    Vue.prototype.$bus.$on('cart-before-add', event => {
+    EventBus.$on('cart-before-add', event => {
       store.dispatch('klaviyo/productAddedToCart', event.product)
     })
 
-    Vue.prototype.$bus.$on('cart-before-delete', event => {
+    EventBus.$on('cart-before-delete', event => {
       let beforeDelete = event.items
-      Vue.prototype.$bus.$on('cart-after-delete', event => {
+      EventBus.$on('cart-after-delete', event => {
         let deleted = beforeDelete.filter(x => !event.items.includes(x))
 
         if (deleted.length) {
@@ -44,17 +47,17 @@ export async function afterRegistration({ Vue, config, store, isServer }) {
       })
     })
 
-    Vue.prototype.$bus.$on('checkout-after-mounted', event => { // TODO: maybe bind it to another event
+    EventBus.$on('checkout-after-mounted', event => { // TODO: maybe bind it to another event
       const onCheckoutStarted = event => {
-        Vue.prototype.$bus.$off('cart-after-updatetotals', onCheckoutStarted)
+        EventBus.$off('cart-after-updatetotals', onCheckoutStarted)
         let cart = rootStore.state.cart
         store.dispatch('klaviyo/checkoutStarted', cart)
       }
 
-      Vue.prototype.$bus.$on('cart-after-updatetotals', onCheckoutStarted)
+      EventBus.$on('cart-after-updatetotals', onCheckoutStarted)
     })
 
-    Vue.prototype.$bus.$on('order-after-placed', event => {
+    EventBus.$on('order-after-placed', event => {
       let cart = rootStore.state.cart
       let order = {
         ...event.order,

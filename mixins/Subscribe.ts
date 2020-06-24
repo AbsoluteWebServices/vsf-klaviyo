@@ -24,7 +24,7 @@ export default {
         })
       }
     },
-    klaviyoSubscribeAdvanced (RequestData?: Object, success?: Function, failure?: Function) {
+    klaviyoSubscribeAdvanced (RequestData?: Record<string, any>, success?: Function, failure?: Function) {
       if (!this.$v.$invalid) {
         this.$store.dispatch('klaviyo/subscribeAdvanced', RequestData).then(res => {
           if (success) success(res)

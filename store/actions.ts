@@ -4,10 +4,11 @@ import * as types from './mutation-types'
 import config from 'config'
 import fetch from 'isomorphic-fetch'
 import rootStore from '@vue-storefront/core/store'
+import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 import * as mappers from '../helpers/mappers'
-import { cacheStorage } from '../'
 import { processURLAddress, onlineHelper } from '@vue-storefront/core/helpers'
 import { Base64 } from '../helpers/webtoolkit.base64.js'
+import { KEY } from '../index'
 
 const encode = (json) => {
   return Base64.encode(JSON.stringify(json)) // ERROR: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
@@ -46,13 +47,15 @@ export const actions: ActionTree<KlaviyoState, any> = {
         mode: 'cors'
       }).then(res => {
         commit(types.SET_CUSTOMER, customer)
+
+        const cacheStorage = StorageManager.get(KEY)
         if (useCache) cacheStorage.setItem('customer', customer)
         resolve(res)
 
         cacheStorage.getItem('trackQueue').then(items => {
           if (items) {
             cacheStorage.removeItem('trackQueue')
-            items.forEach(event => dispatch('track', event).catch(err => {}))
+            items.forEach(event => dispatch('track', event).catch(_ => {}))
           }
         })
       }).catch(err => {
@@ -61,8 +64,9 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
-  loadCustomerFromCache ({ commit }): Promise<Object> {
+  loadCustomerFromCache ({ commit }): Promise<Record<string, any>> {
     return new Promise((resolve, reject) => {
+      const cacheStorage = StorageManager.get(KEY)
       cacheStorage.getItem('customer').then(customer => {
         if (customer) {
           commit(types.SET_CUSTOMER, customer)
@@ -79,6 +83,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     commit(types.SET_NEWSLETTER_SUBSCRIBED, null)
     commit(types.SET_WATCHING, [])
     if (useCache) {
+      const cacheStorage = StorageManager.get(KEY)
       cacheStorage.removeItem('customer')
       cacheStorage.removeItem('backInStockWatching')
     }
@@ -89,11 +94,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
       return new Promise((resolve, reject) => {
         if (state.customer === null) {
           console.warn('No customer identified')
-          reject({ message: 'No customer identified'})
+          reject({ message: 'No customer identified' })
         } else {
-          reject({ message: 'No connection'})
+          reject({ message: 'No connection' })
         }
 
+        const cacheStorage = StorageManager.get(KEY)
         cacheStorage.getItem('trackQueue').then(items => {
           let newItems = items || []
 
@@ -124,7 +130,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
-  status ({ commit, state }, email): Promise<Boolean> {
+  status ({ commit, state }, email): Promise<boolean> {
     return new Promise((resolve, reject) => {
       fetch(processURLAddress(config.klaviyo.endpoint.subscribe) + '?email=' + encodeURIComponent(email) + '&storeCode=' + config.defaultStoreCode, {
         method: 'GET',
@@ -249,7 +255,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
           res.json().then(json => {
             if (json.success) {
               commit(types.BACK_IN_STOCK_SUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
-              if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              if (useCache) {
+                const cacheStorage = StorageManager.get(KEY)
+                cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              }
               resolve(json)
             } else {
               reject(json)
@@ -287,7 +296,10 @@ export const actions: ActionTree<KlaviyoState, any> = {
           res.json().then(json => {
             if (json.success) {
               commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
-              if (useCache) cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              if (useCache) {
+                const cacheStorage = StorageManager.get(KEY)
+                cacheStorage.setItem('backInStockWatching', state.backInStockWatching)
+              }
               resolve(json)
             } else {
               reject(json)
@@ -304,11 +316,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return new Promise((resolve, reject) => {
       const loadFromServer = (): Promise<any> => {
         return new Promise((resolve, reject) => {
-          reject({ message: 'Not Implemented'})
+          reject({ message: 'Not Implemented' })
         })
       }
 
       if (useCache) {
+        const cacheStorage = StorageManager.get(KEY)
         cacheStorage.getItem('backInStockWatching').then(backInStockWatching => {
           if (backInStockWatching) {
             commit(types.SET_WATCHING, backInStockWatching)
@@ -332,19 +345,19 @@ export const actions: ActionTree<KlaviyoState, any> = {
   },
 
   productViewed ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Viewed Product', data: mappers.mapProduct(product) }).catch(err => {})
+    return dispatch('track', { event: 'Viewed Product', data: mappers.mapProduct(product) }).catch(_ => {})
   },
 
   productAddedToCart ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Added to Cart Product', data: mappers.mapLineItem(product) }).catch(err => {})
+    return dispatch('track', { event: 'Added to Cart Product', data: mappers.mapLineItem(product) }).catch(_ => {})
   },
 
   productRemovedFromCart ({ dispatch }, product): Promise<Response> {
-    return dispatch('track', { event: 'Removed from Cart Product', data: mappers.mapLineItem(product) }).catch(err => {})
+    return dispatch('track', { event: 'Removed from Cart Product', data: mappers.mapLineItem(product) }).catch(_ => {})
   },
 
   checkoutStarted ({ dispatch }, cart): Promise<Response> {
-    return dispatch('track', { event: 'Started Checkout', data: mappers.mapCart(cart) }).catch(err => {})
+    return dispatch('track', { event: 'Started Checkout', data: mappers.mapCart(cart) }).catch(_ => {})
   },
 
   orderPlaced ({ dispatch }, order): Promise<Response> {
@@ -354,11 +367,11 @@ export const actions: ActionTree<KlaviyoState, any> = {
           dispatch('productOrdered', { order, product })
         })
         resolve(res)
-      }).catch(err => {})
+      }).catch(_ => {})
     })
   },
 
   productOrdered ({ dispatch }, { order, product }): Promise<Response> {
-    return dispatch('track', { event: 'Ordered Product', data: mappers.mapOrderedProduct(order, product) }).catch(err => {})
+    return dispatch('track', { event: 'Ordered Product', data: mappers.mapOrderedProduct(order, product) }).catch(_ => {})
   }
 }
