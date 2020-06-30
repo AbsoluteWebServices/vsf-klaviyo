@@ -79,8 +79,9 @@ export const mapLineItem = (product) => {
 
 export const mapCart = (cart) => {
   let userToken = rootStore.getters['user/getUserToken']
+  let refreshToken = rootStore.state.user.refreshToken
   let cartId = cart.cartServerToken
-  let link = router.resolve({ name: 'checkout', query: { userToken, cartId } })
+  let link = router.resolve({ name: 'checkout', query: { userToken, refreshToken, cartId } })
   let products = []
 
   for (let i = 0; i < cart.cartItems.length; i++) {
