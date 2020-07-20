@@ -4,6 +4,7 @@ import * as types from './mutation-types'
 import config from 'config'
 import fetch from 'isomorphic-fetch'
 import rootStore from '@vue-storefront/core/store'
+import { currentStoreView } from '@vue-storefront/core/lib/multistore'
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 import * as mappers from '../helpers/mappers'
 import { processURLAddress, onlineHelper } from '@vue-storefront/core/helpers'
@@ -233,6 +234,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   backInStockSubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (!getters.isWatching(product.sku)) {
       let formData = new FormData()
+      const { storeId } = currentStoreView()
 
       formData.append('a', config.klaviyo.public_key)
       formData.append('email', email)
@@ -241,6 +243,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       formData.append('product', product.parentSku ? product.parentSku : product.sku)
       formData.append('platform', config.klaviyo.platform)
       formData.append('subscribe_for_newsletter', subscribeForNewsletter)
+      formData.append('store', storeId || config.defaultStoreId)
 
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.backInStock), {
@@ -274,6 +277,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
   backInStockUnsubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
       let formData = new FormData()
+      const { storeId } = currentStoreView()
 
       formData.append('a', config.klaviyo.public_key)
       formData.append('email', email)
@@ -282,6 +286,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       formData.append('product', product.parentSku ? product.parentSku : product.sku)
       formData.append('platform', config.klaviyo.platform)
       formData.append('subscribe_for_newsletter', subscribeForNewsletter)
+      formData.append('store', storeId || config.defaultStoreId)
 
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
