@@ -238,12 +238,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
       formData.append('a', config.klaviyo.public_key)
       formData.append('email', email)
-      formData.append('g', config.klaviyo.listId)
+      formData.append('g', config.klaviyo.backInStockListId)
       formData.append('variant', product.sku)
       formData.append('product', product.parentSku ? product.parentSku : product.sku)
       formData.append('platform', config.klaviyo.platform)
-      formData.append('subscribe_for_newsletter', subscribeForNewsletter)
       formData.append('store', storeId || config.defaultStoreId)
+      formData.append('subscribe_for_newsletter', subscribeForNewsletter)
 
       return new Promise((resolve, reject) => {
         fetch(processURLAddress(config.klaviyo.endpoint.backInStock), {
@@ -274,30 +274,20 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  backInStockUnsubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
+  backInStockUnsubscribe ({ state, commit, getters, dispatch }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
-      let formData = new FormData()
       const { storeId } = currentStoreView()
 
-      formData.append('a', config.klaviyo.public_key)
-      formData.append('email', email)
-      formData.append('g', config.klaviyo.listId)
-      formData.append('variant', product.sku)
-      formData.append('product', product.parentSku ? product.parentSku : product.sku)
-      formData.append('platform', config.klaviyo.platform)
-      formData.append('subscribe_for_newsletter', subscribeForNewsletter)
-      formData.append('store', storeId || config.defaultStoreId)
-
-      return new Promise((resolve, reject) => {
-        fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          mode: 'cors',
-          body: formData
-        }).then(res => {
+      return dispatch('track', {
+        event: 'Requested Back In Stock Unsubscribe',
+        data: {
+          email: email,
+          listId: config.klaviyo.backInStockListId,
+          storeId: storeId || config.defaultStoreId,
+          product: product.parentSku ? product.parentSku : product.sku,
+          variant: product.sku
+        }
+      }).then(res => {
           res.json().then(json => {
             if (json.success) {
               commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
@@ -313,7 +303,6 @@ export const actions: ActionTree<KlaviyoState, any> = {
         }).catch(err => {
           reject(err)
         })
-      })
     }
   },
 
