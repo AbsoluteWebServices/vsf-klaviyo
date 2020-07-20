@@ -276,18 +276,19 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   backInStockUnsubscribe ({ state, commit, getters, dispatch }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
-      const { storeId } = currentStoreView()
+      const {storeId} = currentStoreView()
 
-      return dispatch('track', {
-        event: 'Requested Back In Stock Unsubscribe',
-        data: {
-          email: email,
-          listId: config.klaviyo.backInStockListId,
-          storeId: storeId || config.defaultStoreId,
-          product: product.parentSku ? product.parentSku : product.sku,
-          variant: product.sku
-        }
-      }).then(res => {
+      return new Promise((resolve, reject) => {
+        dispatch('track', {
+          event: 'Requested Back In Stock Unsubscribe',
+          data: {
+            email: email,
+            listId: config.klaviyo.backInStockListId,
+            storeId: storeId || config.defaultStoreId,
+            product: product.parentSku ? product.parentSku : product.sku,
+            variant: product.sku
+          }
+        }).then(res => {
           res.json().then(json => {
             if (json.success) {
               commit(types.BACK_IN_STOCK_UNSUBSCRIBE, product.parentSku ? product.parentSku + '-' + product.sku : product.sku)
@@ -303,6 +304,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
         }).catch(err => {
           reject(err)
         })
+      })
     }
   },
 
