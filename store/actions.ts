@@ -204,17 +204,15 @@ export const actions: ActionTree<KlaviyoState, any> = {
     })
   },
 
-  unsubscribe ({ commit, state }, email): Promise<Response> {
+  unsubscribe ({ commit, state, dispatch }, email): Promise<Response> {
     if (state.isSubscribed) {
       return new Promise((resolve, reject) => {
-        fetch(processURLAddress(config.klaviyo.endpoint.subscribe), {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          mode: 'cors',
-          body: JSON.stringify({ email })
+        dispatch('track', {
+          event: 'Request to Unsubscribe',
+          data: {
+            email: email,
+            listId: config.klaviyo.listId
+          }
         }).then(res => {
           commit(types.NEWSLETTER_UNSUBSCRIBE)
 
