@@ -1,5 +1,7 @@
+import config from 'config'
 import rootStore from '@vue-storefront/core/store'
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers'
+import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/helpers'
 import { router } from '@vue-storefront/core/app'
 
 export const mapPersonalDetails = (details) => {
@@ -56,6 +58,13 @@ export const mapProduct = (product) => {
       }
     }
   }
+  
+  let imageUrl = productThumbnailPath(product)
+  imageUrl = getThumbnailPath(
+    imageUrl,
+    config.products.thumbnails.width,
+    config.products.thumbnails.height
+  )
 
   return {
     'ProductID': product.id.toString(),
@@ -64,7 +73,7 @@ export const mapProduct = (product) => {
     'ItemPrice': product.price.toString(),
     'Categories': categories,
     'ProductURL': window.location.origin + link.href,
-    'ImageURL': product.image.includes('://') ? product.image : window.location.origin + product.image,
+    'ImageURL': imageUrl.includes('://') ? imageUrl : window.location.origin + imageUrl,
     'CompareAtPrice': product.special_price
   }
 }
