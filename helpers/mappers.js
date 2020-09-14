@@ -64,7 +64,7 @@ export const mapProduct = (product) => {
     'ItemPrice': product.price.toString(),
     'Categories': categories,
     'ProductURL': window.location.origin + link.href,
-    'ImageURL': window.location.origin + product.image,
+    'ImageURL': product.image.includes('://') ? product.image : window.location.origin + product.image,
     'CompareAtPrice': product.special_price
   }
 }
