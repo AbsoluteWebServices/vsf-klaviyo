@@ -58,7 +58,7 @@ export const mapProduct = (product) => {
       }
     }
   }
-  
+
   let imageUrl = productThumbnailPath(product)
   imageUrl = getThumbnailPath(
     imageUrl,
