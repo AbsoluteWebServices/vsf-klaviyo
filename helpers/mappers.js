@@ -1,8 +1,10 @@
 import config from 'config'
 import rootStore from '@vue-storefront/core/store'
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers'
+import { localizedDispatcherRoute } from '@vue-storefront/core/lib/multistore'
 import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/helpers'
 import { router } from '@vue-storefront/core/app'
+import omit from 'lodash-es/omit'
 
 export const mapPersonalDetails = (details) => {
   let customer = {
@@ -37,7 +39,23 @@ export const mapCustomer = (user) => {
 }
 
 export const mapProduct = (product) => {
-  let route = formatProductLink(product, rootStore.state.storeView.storeCode)
+  let route
+
+  if (config.seo.useUrlDispatcher && product.path) {
+    let routeData
+    if ((product.options && product.options.length > 0) || (product.configurable_children && product.configurable_children.length > 0)) {
+      routeData = {
+        path: product.path,
+        params: { childSku: product.sku }
+      }
+    } else {
+      routeData = { path: product.path }
+    }
+    route = localizedDispatcherRoute(routeData)
+  } else {
+    route = formatProductLink(product, rootStore.state.storeView.storeCode)
+  }
+
   let link = router.resolve(route)
   let categories = []
 
@@ -60,11 +78,35 @@ export const mapProduct = (product) => {
   }
 
   let imageUrl = productThumbnailPath(product)
-  imageUrl = getThumbnailPath(
-    imageUrl,
-    config.products.thumbnails.width,
-    config.products.thumbnails.height
-  )
+  if (!imageUrl.includes('://')) {
+    imageUrl = getThumbnailPath(
+      imageUrl,
+      config.products.thumbnails.width,
+      config.products.thumbnails.height
+    )
+
+    if (!imageUrl.includes('://')) {
+      imageUrl = window.location.origin + imageUrl
+    }
+  }
+
+  const additionalData = omit(product, ['id', 'server_cart_id', 'server_item_id', 'tax_class_id', 'sku', 'name', 'price', 'qty', 'category', 'category_ids', 'extension_attributes', 'image', 'special_price', 'info', 'stock', 'is_in_stock', 'onlineStockCheckid', 'is_returnable', 'totals', 'errors', 'product_option', 'options', 'configurable_children', 'checksum', 'tsk', 'status', 'visibility', 'gift_message_available', 'gift_wrapping_available', 'page_layout'])
+  const attributes = rootStore.getters['attribute/attributeListByCode']
+
+  for (const key in attributes) {
+    if (attributes.hasOwnProperty(key)) {
+      const attribute = attributes[key];
+
+      if (attribute.is_user_defined && additionalData.hasOwnProperty(key) && attribute.hasOwnProperty('options')) {
+        // eslint-disable-next-line eqeqeq
+        const option = attribute.options.find(a => a.value == additionalData[key])
+
+        if (option) {
+          additionalData[key] = option.label
+        }
+      }
+    }
+  }
 
   return {
     'ProductID': product.id.toString(),
@@ -73,8 +115,9 @@ export const mapProduct = (product) => {
     'ItemPrice': product.price.toString(),
     'Categories': categories,
     'ProductURL': window.location.origin + link.href,
-    'ImageURL': imageUrl.includes('://') ? imageUrl : window.location.origin + imageUrl,
-    'CompareAtPrice': product.special_price
+    'ImageURL': imageUrl,
+    'CompareAtPrice': product.special_price,
+    ...additionalData
   }
 }
 
