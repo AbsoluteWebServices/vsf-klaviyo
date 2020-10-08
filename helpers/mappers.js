@@ -78,14 +78,14 @@ export const mapProduct = (product) => {
   }
 
   let imageUrl = productThumbnailPath(product)
-  if (!imageUrl.includes('://')) {
+  if (imageUrl && !imageUrl.includes('://')) {
     imageUrl = getThumbnailPath(
       imageUrl,
       config.products.thumbnails.width,
       config.products.thumbnails.height
     )
 
-    if (!imageUrl.includes('://')) {
+    if (imageUrl && !imageUrl.includes('://')) {
       imageUrl = window.location.origin + imageUrl
     }
   }
