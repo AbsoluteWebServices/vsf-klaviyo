@@ -10,7 +10,7 @@ export async function afterRegistration (appConfig, store) {
     if (!store.state.klaviyo.customer) {
       const receivedData = await StorageManager.get('checkout').getItem('personal-details')
       if (receivedData) {
-        store.dispatch('klaviyo/identify', { personalDetails: receivedData })
+        store.dispatch('klaviyo/identify', { user: receivedData })
       }
     }
 
@@ -20,7 +20,7 @@ export async function afterRegistration (appConfig, store) {
 
     EventBus.$on('checkout-after-personalDetails', receivedData => {
       if (!store.state.klaviyo.customer && receivedData.hasOwnProperty('email')) {
-        store.dispatch('klaviyo/identify', { personalDetails: receivedData })
+        store.dispatch('klaviyo/identify', { user: receivedData })
       }
     })
 

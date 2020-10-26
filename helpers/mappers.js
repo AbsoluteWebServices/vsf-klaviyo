@@ -6,36 +6,12 @@ import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/hel
 import { router } from '@vue-storefront/core/app'
 import omit from 'lodash-es/omit'
 
-export const mapPersonalDetails = (details) => {
-  let customer = {
-    '$email': details.emailAddress
-  }
-
-  if (details.firstName) {
-    customer['$first_name'] = details.firstName
-  }
-
-  if (details.lastName) {
-    customer['$last_name'] = details.lastName
-  }
-
-  return customer
-}
-
 export const mapCustomer = (user) => {
-  let customer = {
-    '$email': user.email
+  return {
+    '$email': user.email || user.emailAddress,
+    '$first_name': user.firstname || user.firstName || undefined,
+    '$last_name': user.lastname || user.lastName || undefined
   }
-
-  if (user.firstname) {
-    customer['$first_name'] = user.firstname
-  }
-
-  if (user.lastname) {
-    customer['$last_name'] = user.lastname
-  }
-
-  return customer
 }
 
 export const mapProduct = (product) => {
@@ -143,7 +119,7 @@ export const mapCart = (cart) => {
 
   return {
     '$event_id': cartId,
-    '$value': cart.platformTotals.grand_total,
+    '$value': cart.platformTotals ? cart.platformTotals.grand_total : products.reduce((accumulator, product) => accumulator + product.RowTotal, 0),
     'ItemNames': products.map(prod => prod.ProductName),
     'CheckoutURL': window.location.origin + link.href,
     'Items': products

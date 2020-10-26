@@ -24,16 +24,12 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  identify ({ commit, dispatch }, { user = null, personalDetails = null, useCache = true, additionalData = {} }): Promise<Response> {
-    let customer
-
-    if (user) {
-      customer = mappers.mapCustomer(user)
-    } else if (personalDetails) {
-      customer = mappers.mapPersonalDetails(personalDetails)
-    } else {
+  identify ({ commit, dispatch }, { user, useCache = true, additionalData = {} }): Promise<Response> {
+    if (!user) {
       throw new Error('User details are required')
     }
+
+    const customer = mappers.mapCustomer(user)
 
     let request = {
       token: config.klaviyo.public_key,
