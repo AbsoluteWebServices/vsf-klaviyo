@@ -5,6 +5,19 @@ import { afterRegistration } from './hooks/afterRegistration'
 
 export const KEY = 'klaviyo'
 
+export const defaultEventsConfig = {
+  'productViewed': ['product-after-single'],
+  'productAddedToCart': ['cart-before-add'],
+  'productRemovedFromCart': [
+    {
+      'before': 'cart-before-delete',
+      'after': 'cart-after-delete'
+    }
+  ],
+  'checkoutStarted': ['checkout-after-mounted'],
+  'orderPlaced': ['order-after-placed']
+}
+
 export const KlaviyoModule: StorefrontModule = function ({ store, appConfig }) {
   StorageManager.init(KEY)
 

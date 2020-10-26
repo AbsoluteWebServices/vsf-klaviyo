@@ -2,6 +2,7 @@ import rootStore from '@vue-storefront/core/store'
 import { isServer } from '@vue-storefront/core/helpers'
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { defaultEventsConfig } from '../index'
 
 export async function afterRegistration (appConfig, store) {
   if (!isServer && appConfig.klaviyo && appConfig.klaviyo.public_key) {
@@ -28,42 +29,88 @@ export async function afterRegistration (appConfig, store) {
       store.dispatch('klaviyo/resetCustomer')
     })
 
-    EventBus.$on('product-after-single', event => {
-      store.dispatch('klaviyo/productViewed', event.product)
-    })
+    const eventsConfig = appConfig.klaviyo.events || defaultEventsConfig
 
-    EventBus.$on('cart-before-add', event => {
-      store.dispatch('klaviyo/productAddedToCart', event.product)
-    })
+    if (eventsConfig.hasOwnProperty('productViewed')) {
+      if (!Array.isArray(eventsConfig.productViewed)) {
+        eventsConfig.productViewed = [eventsConfig.productViewed]
+      }
 
-    EventBus.$on('cart-before-delete', event => {
-      let beforeDelete = event.items
-      EventBus.$on('cart-after-delete', event => {
-        let deleted = beforeDelete.filter(x => !event.items.includes(x))
+      for (let i = 0; i < eventsConfig.productViewed.length; i++) {
+        EventBus.$on(eventsConfig.productViewed[i], event => {
+          store.dispatch('klaviyo/productViewed', event.product)
+        })
+      }
+    }
 
-        if (deleted.length) {
-          store.dispatch('klaviyo/productRemovedFromCart', deleted[0])
+    if (eventsConfig.hasOwnProperty('productAddedToCart')) {
+      if (!Array.isArray(eventsConfig.productAddedToCart)) {
+        eventsConfig.productAddedToCart = [eventsConfig.productAddedToCart]
+      }
+
+      for (let i = 0; i < eventsConfig.productAddedToCart.length; i++) {
+        EventBus.$on(eventsConfig.productAddedToCart[i], event => {
+          store.dispatch('klaviyo/productAddedToCart', event.product)
+        })
+      }
+    }
+
+    if (eventsConfig.hasOwnProperty('productRemovedFromCart')) {
+      if (!Array.isArray(eventsConfig.productRemovedFromCart)) {
+        eventsConfig.productRemovedFromCart = [eventsConfig.productRemovedFromCart]
+      }
+
+      for (let i = 0; i < eventsConfig.productRemovedFromCart.length; i++) {
+        EventBus.$on(eventsConfig.productRemovedFromCart[i].before, event => {
+          const beforeDelete = event.items
+
+          EventBus.$on(eventsConfig.productRemovedFromCart[i].after, event => {
+            const deleted = beforeDelete.find(x => !event.items.includes(x))
+
+            if (deleted) {
+              store.dispatch('klaviyo/productRemovedFromCart', deleted)
+            }
+          })
+        })
+      }
+    }
+
+    if (eventsConfig.hasOwnProperty('checkoutStarted')) {
+      if (!Array.isArray(eventsConfig.checkoutStarted)) {
+        eventsConfig.checkoutStarted = [eventsConfig.checkoutStarted]
+      }
+
+      for (let i = 0; i < eventsConfig.checkoutStarted.length; i++) {
+        if (eventsConfig.checkoutStarted[i] === 'checkout-after-mounted') {
+          EventBus.$on(eventsConfig.checkoutStarted[i], () => {
+            const onCheckoutStarted = () => {
+              EventBus.$off('cart-after-updatetotals', onCheckoutStarted)
+              store.dispatch('klaviyo/checkoutStarted', rootStore.state.cart)
+            }
+
+            EventBus.$on('cart-after-updatetotals', onCheckoutStarted)
+          })
+        } else {
+          EventBus.$on(eventsConfig.checkoutStarted[i], event => {
+            store.dispatch('klaviyo/checkoutStarted', (event && event.cart) || rootStore.state.cart)
+          })
         }
-      })
-    })
+      }
+    }
 
-    EventBus.$on('checkout-after-mounted', event => { // TODO: maybe bind it to another event
-      const onCheckoutStarted = event => {
-        EventBus.$off('cart-after-updatetotals', onCheckoutStarted)
-        let cart = rootStore.state.cart
-        store.dispatch('klaviyo/checkoutStarted', cart)
+    if (eventsConfig.hasOwnProperty('orderPlaced')) {
+      if (!Array.isArray(eventsConfig.orderPlaced)) {
+        eventsConfig.orderPlaced = [eventsConfig.orderPlaced]
       }
 
-      EventBus.$on('cart-after-updatetotals', onCheckoutStarted)
-    })
-
-    EventBus.$on('order-after-placed', event => {
-      let cart = rootStore.state.cart
-      let order = {
-        ...event.order,
-        cart
+      for (let i = 0; i < eventsConfig.orderPlaced.length; i++) {
+        EventBus.$on(eventsConfig.orderPlaced[i], event => {
+          store.dispatch('klaviyo/orderPlaced', {
+            ...event.order,
+            cart: event.cart || rootStore.state.cart
+          })
+        })
       }
-      store.dispatch('klaviyo/orderPlaced', order)
-    })
+    }
   }
 }
