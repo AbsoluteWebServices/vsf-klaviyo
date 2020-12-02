@@ -17,11 +17,19 @@ const encode = (json) => {
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<KlaviyoState, any> = {
-  maybeIdentify ({ state, dispatch }, { user = null, personalDetails = null, useCache = true }): Promise<Response | object> {
+  maybeIdentify ({ state, dispatch }, { user = null, useCache = true, additionalData = {} }): Promise<Response | object> {
     if (state.customer === null) {
-      return dispatch('identify', { user, personalDetails, useCache })
+      return dispatch('identify', { user, useCache, additionalData })
     } else {
       return new Promise((resolve) => resolve(state.customer))
+    }
+  },
+
+  updateCustomerAddress ({ state, dispatch }, { address, useCache = true }): Promise<Response> {
+    if (state.customer === null) {
+      return new Promise((resolve, reject) => reject())
+    } else {
+      return dispatch('identify', { user: state.customer, useCache, additionalData: mappers.mapAddress(address) })
     }
   },
 
@@ -36,6 +44,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
       token: config.klaviyo.public_key,
       properties: Object.assign(customer, additionalData)
     }
+
     let url = processURLAddress(config.klaviyo.endpoint.api) + '/identify?data=' + encode(request)
 
     return new Promise((resolve, reject) => {
@@ -179,7 +188,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     }
   },
 
-  subscribeAdvanced ({ commit, dispatch, state }, requestData) : Promise<Response> {
+  subscribeAdvanced ({ commit, dispatch, state }, requestData): Promise<Response> {
     return new Promise((resolve, reject) => {
       fetch(processURLAddress(config.klaviyo.endpoint.subscribeAdvanced), {
         method: 'POST',
@@ -270,7 +279,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   backInStockUnsubscribe ({ state, commit, getters, dispatch }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (getters.isWatching(product.sku)) {
-      const {storeId} = currentStoreView()
+      const { storeId } = currentStoreView()
 
       return new Promise((resolve, reject) => {
         dispatch('track', {
@@ -350,14 +359,35 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return dispatch('track', { event: 'Started Checkout', data: mappers.mapCart(cart) }).catch(_ => {})
   },
 
-  orderPlaced ({ dispatch }, order): Promise<Response> {
-    return new Promise((resolve, reject) => {
-      dispatch('track', { event: 'Placed Order', data: mappers.mapOrder(order) }).then(res => {
+  orderPlaced ({ state, dispatch }, order): Promise<Response> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const addressInfo = order.addressInformation.shippingAddress || order.addressInformation.billingAddress
+
+        if (addressInfo) {
+          let user: any = state.customer
+
+          if (user === null) {
+            user = {
+              email: addressInfo.email
+            }
+          }
+
+          user.firstname = addressInfo.firstname
+          user.lastname = addressInfo.lastname
+          user.telephone = addressInfo.telephone
+          user.address = addressInfo
+
+          await dispatch('identify', { user })
+        }
+
+        const response = await dispatch('track', { event: 'Placed Order', data: mappers.mapOrder(order) })
         order.products.forEach(product => {
           dispatch('productOrdered', { order, product })
         })
-        resolve(res)
-      }).catch(_ => {})
+
+        resolve(response)
+      } catch (_) {}
     })
   },
 

@@ -6,12 +6,53 @@ import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/hel
 import { router } from '@vue-storefront/core/app'
 import omit from 'lodash-es/omit'
 
-export const mapCustomer = (user) => {
+export const mapAddress = (address) => {
   return {
-    '$email': user.email || user.emailAddress,
-    '$first_name': user.firstname || user.firstName || undefined,
-    '$last_name': user.lastname || user.lastName || undefined
+    '$city': address.city,
+    'City': address.city,
+    '$region': address.state || (address.region && address.region.region) || address.region || address.region_code || null,
+    'State / Region': address.state || (address.region && address.region.region) || address.region || address.region_code || null,
+    '$country': address.country || address.country_id,
+    'Country': address.country || address.country_id,
+    '$zip': address.zipCode || address.postcode,
+    'Zip Code': address.zipCode || address.postcode,
+    'Address': address.streetAddress || (address.street && address.street[0]) || null,
+    'Address 2': address.apartmentNumber || (address.street && address.street[1]) || null,
+    'Latitude': address.latitude || null,
+    'Longitude': address.longitude || null
   }
+}
+
+export const mapCustomer = (user) => {
+  let customer = {
+    '$email': user.email || user.emailAddress || user['$email'],
+    '$id': user.id || undefined,
+    '$first_name': user.firstname || user.firstName || user['$first_name'] || undefined,
+    '$last_name': user.lastname || user.lastName || user['$last_name'] || undefined,
+    '$phone_number': user.telephone || user['$phone_number'] || undefined
+  }
+
+  if (user.custom_attributes && user.custom_attributes.length) {
+    const phone = user.custom_attributes.find(attribute => attribute.attribute_code === 'phone')
+
+    if (phone) {
+      customer['$phone_number'] = phone.value
+    }
+  }
+
+  if ((!customer.hasOwnProperty('$phone_number') || !customer['$phone_number']) && user.extension_attributes && user.extension_attributes.phone) {
+    customer['$phone_number'] = user.extension_attributes.phone
+  }
+
+  if (user.address) {
+    Object.assign(customer, mapAddress(user.address))
+  } else if (user.addresses && user.addresses.length) {
+    const address = user.addresses.find(address => address.default) || user.addresses[0]
+
+    Object.assign(customer, mapAddress(address))
+  }
+
+  return customer
 }
 
 export const mapProduct = (product) => {
