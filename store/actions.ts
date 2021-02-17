@@ -346,8 +346,18 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return dispatch('track', { event: 'Removed from Cart Product', data: mappers.mapLineItem(product) }).catch(_ => {})
   },
 
-  checkoutStarted ({ dispatch }, cart): Promise<Response> {
-    return dispatch('track', { event: 'Started Checkout', data: mappers.mapCart(cart) }).catch(_ => {})
+  async checkoutStarted ({ dispatch }, cart): Promise<Response> {
+    let cartMapper
+    
+    try {
+      const cartMapperOverride = config.klaviyo.mappers.mapCart
+      if (cartMapperOverride) {
+        let cartMapper = await rootStore.dispatch(`${cartMapperOverride}`, cart, { root: true })
+      }
+    } catch {
+      cartMapper = mappers.mapCart(cart)
+    }
+    return dispatch('track', { event: 'Started Checkout', data: cartMapper || mappers.mapCart(cart) }).catch(_ => {})
   },
 
   orderPlaced ({ dispatch }, order): Promise<Response> {
