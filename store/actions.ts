@@ -361,7 +361,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
     try {
       const cartMapperOverride = config.klaviyo.mappers.mapCart
       if (cartMapperOverride) {
-        let cartMapper = await rootStore.dispatch(`${cartMapperOverride}`, cart, { root: true })
+        cartMapper = await rootStore.dispatch(`${cartMapperOverride}`, cart, { root: true })
       }
     } catch {
       cartMapper = mappers.mapCart(cart)
