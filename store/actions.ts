@@ -146,17 +146,17 @@ export const actions: ActionTree<KlaviyoState, any> = {
         },
         mode: 'cors'
       }).then(res => res.json())
-          .then(res => {
-            if (Array.isArray(res.result) && res.result.length > 0) {
-              commit(types.NEWSLETTER_SUBSCRIBE)
-              resolve(true)
-            } else {
-              commit(types.NEWSLETTER_UNSUBSCRIBE)
-              resolve(false)
-            }
-          }).catch(err => {
-        reject(err)
-      })
+        .then(res => {
+          if (Array.isArray(res.result) && res.result.length > 0) {
+            commit(types.NEWSLETTER_SUBSCRIBE)
+            resolve(true)
+          } else {
+            commit(types.NEWSLETTER_UNSUBSCRIBE)
+            resolve(false)
+          }
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
 
@@ -355,8 +355,18 @@ export const actions: ActionTree<KlaviyoState, any> = {
     return dispatch('track', { event: 'Removed from Cart Product', data: mappers.mapLineItem(product) }).catch(_ => {})
   },
 
-  checkoutStarted ({ dispatch }, cart): Promise<Response> {
-    return dispatch('track', { event: 'Started Checkout', data: mappers.mapCart(cart) }).catch(_ => {})
+  async checkoutStarted ({ dispatch }, cart): Promise<Response> {
+    let cartMapper
+    
+    try {
+      const cartMapperOverride = config.klaviyo.mappers.mapCart
+      if (cartMapperOverride) {
+        cartMapper = await rootStore.dispatch(`${cartMapperOverride}`, cart, { root: true })
+      }
+    } catch {
+      cartMapper = mappers.mapCart(cart)
+    }
+    return dispatch('track', { event: 'Started Checkout', data: cartMapper || mappers.mapCart(cart) }).catch(_ => {})
   },
 
   orderPlaced ({ state, dispatch }, order): Promise<Response> {
@@ -393,9 +403,5 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   productOrdered ({ dispatch }, { order, product }): Promise<Response> {
     return dispatch('track', { event: 'Ordered Product', data: mappers.mapOrderedProduct(order, product) }).catch(_ => {})
-  },
-
-  visitedBrand ({ dispatch }, brandName): Promise<Response> {
-    return dispatch('track', { event: 'Visited Brand', data: { BrandName: brandName } }).catch(_ => {})
   }
 }
