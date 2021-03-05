@@ -6,6 +6,10 @@ import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/hel
 import { router } from '@vue-storefront/core/app'
 import omit from 'lodash-es/omit'
 
+export const getVisitedBrandName = () => {
+  return rootStore.getters['brandStore/getTrackingBrandName'] || ''
+}
+
 export const mapAddress = (address) => {
   return {
     '$city': address.city,
@@ -126,6 +130,7 @@ export const mapProduct = (product) => {
   }
 
   return {
+    'BrandName': getVisitedBrandName(),
     'ProductID': product.id.toString(),
     'SKU': product.sku,
     'ProductName': product.name,
@@ -163,7 +168,8 @@ export const mapCart = (cart) => {
     '$value': cart.platformTotals ? cart.platformTotals.grand_total : products.reduce((accumulator, product) => accumulator + product.RowTotal, 0),
     'ItemNames': products.map(prod => prod.ProductName),
     'CheckoutURL': window.location.origin + link.href,
-    'Items': products
+    'Items': products,
+    'BrandName': getVisitedBrandName()
   }
 }
 
@@ -193,7 +199,8 @@ export const mapOrder = (order) => {
     '$value': subtotal,
     'ItemNames': products.map(prod => prod.ProductName),
     'Categories': categories,
-    'Items': products
+    'Items': products,
+    'BrandName': getVisitedBrandName()
   }
 
   if (order.cart) {
