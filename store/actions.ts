@@ -363,5 +363,9 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   productOrdered ({ dispatch }, { order, product }): Promise<Response> {
     return dispatch('track', { event: 'Ordered Product', data: mappers.mapOrderedProduct(order, product) }).catch(_ => {})
+  },
+
+  visitedBrand ({ dispatch }, brandName): Promise<Response> {
+    return dispatch('track', { event: 'Visited Brand', data: { BrandName: brandName } }).catch(_ => {})
   }
 }
