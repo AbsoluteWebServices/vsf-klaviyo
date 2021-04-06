@@ -236,7 +236,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   backInStockSubscribe ({ state, commit, getters }, { product, email, subscribeForNewsletter, useCache = true }): Promise<Response> {
     if (!getters.isWatching(product.sku)) {
-      let formData = new FormData()
+      let formData = new URLSearchParams()
       const { storeId } = currentStoreView()
 
       formData.append('a', config.klaviyo.public_key)
@@ -256,7 +256,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           mode: 'cors',
-          body: formData
+          body: formData.toString()
         }).then(res => {
           res.json().then(json => {
             if (json.success) {
@@ -357,7 +357,7 @@ export const actions: ActionTree<KlaviyoState, any> = {
 
   async checkoutStarted ({ dispatch }, cart): Promise<Response> {
     let cartMapper
-    
+
     try {
       const cartMapperOverride = config.klaviyo.mappers.mapCart
       if (cartMapperOverride) {
