@@ -1,0 +1,55 @@
+{
+  "name": "@absolute-web/vsf-klaviyo",
+  "version": "0.0.1",
+  "description": "The Klaviyo module.",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.es.js",
+  "server": "server/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rimraf lib server && yarn run rollup -c",
+    "dev": "rimraf lib server && yarn run rollup -c -w"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbsoluteWebServices/vsf-klaviyo.git"
+  },
+  "keywords": [
+    "klaviyo",
+    "vsf-klaviyo",
+    "vue-storefront-klaviyo",
+    "vue-storefront",
+    "divanteltd/vue-storefront"
+  ],
+  "author": "Dmitry Kozachek <dmitryk@absoluteweb.com> and contributors",
+  "maintainers": [],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AbsoluteWebServices/vsf-klaviyo/issues"
+  },
+  "homepage": "https://github.com/AbsoluteWebServices/vsf-klaviyo#readme",
+  "dependencies": {
+    "@vue-storefront/core": "~2.4.1",
+    "axios": "^0.21.1",
+    "vue-demi": "latest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.52.1",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.3.3"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "1.0.0-beta.21",
+    "vue": "^2.0.0 || >=3.0.0-rc.0"
+  },
+  "files": [
+    "lib/**/*",
+    "nuxt/**/*",
+    "server/**/*"
+  ]
+}
