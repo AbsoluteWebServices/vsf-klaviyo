@@ -1,3 +1,4 @@
+export { default as backInStockSubscribe } from './backInStockSubscribe';
 export { default as identify } from './identify';
 export { default as subscribe } from './subscribe';
 export { default as subscriptions } from './subscriptions';

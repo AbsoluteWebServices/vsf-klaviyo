@@ -7,6 +7,7 @@ import {
   sharedRef,
 } from '@vue-storefront/core';
 import {
+  BackInStockSubscribeParams,
   CustomerProperties,
   EventProperties,
   ProfileProperties,
@@ -21,6 +22,7 @@ export interface UseKlaviyoFactoryParams extends FactoryParams{
   checkSubscription: (context: Context, params: { email?: string; phone_number?: string; push_token?: string }) =>  Promise<boolean>;
   subscribe: (context: Context, params: { profile: ProfileProperties }) =>  Promise<boolean>;
   unsubscribe: (context: Context, params: { email?: string; phone_number?: string; push_token?: string }) =>  Promise<boolean>;
+  backInStockSubscribe: (context: Context, params: BackInStockSubscribeParams) =>  Promise<boolean>;
 }
 
 declare global {
@@ -43,6 +45,7 @@ export function useKlaviyoFactory(
       subscribe: null,
       checkSubscription: null,
       unsubscribe: null,
+      backInStockSubscribe: null,
     }, `useKlaviyo-${ssrKey}-error`);
     // eslint-disable-next-line @typescript-eslint/naming-convention,no-underscore-dangle
     const _factoryParams = configureFactoryParams(factoryParams);
@@ -58,6 +61,7 @@ export function useKlaviyoFactory(
         subscribe: null,
         checkSubscription: null,
         unsubscribe: null,
+        backInStockSubscribe: null,
       };
       trackQueue.value = [];
     }
@@ -171,6 +175,23 @@ export function useKlaviyoFactory(
       }
     };
 
+    const backInStockSubscribe = async ({ email, productId, variantId, subscribe }: BackInStockSubscribeParams): Promise<boolean> => {
+      Logger.debug(`useKlaviyo/${ssrKey}/backInStockSubscribe`, { email, productId, variantId, subscribe });
+
+      try {
+        loading.value = true;
+        const result = await _factoryParams.backInStockSubscribe({ email, productId, variantId, subscribe });
+        error.value.backInStockSubscribe = null;
+        return result;
+      } catch (err: any) {
+        error.value.backInStockSubscribe = err;
+        Logger.error(`useKlaviyo/${ssrKey}/backInStockSubscribe`, err);
+        return false;
+      } finally {
+        loading.value = false;
+      }
+    };
+
     return {
       customer: computed(() => customer.value),
       isSubscribed: computed(() => isSubscribed.value),
@@ -182,6 +203,7 @@ export function useKlaviyoFactory(
       checkSubscription,
       subscribe,
       unsubscribe,
+      backInStockSubscribe,
     };
   };
 }

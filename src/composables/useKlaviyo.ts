@@ -64,6 +64,9 @@ const factoryParams: UseKlaviyoFactoryParams = {
 
     return context.$klaviyo.api.unsubscribe(params);
   },
+  backInStockSubscribe: async (context: Context, params): Promise<boolean> => {
+    return context.$klaviyo.api.backInStockSubscribe(params);
+  },
 };
 
 

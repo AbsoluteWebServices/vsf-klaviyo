@@ -8,6 +8,11 @@ export interface ClientConfig {
   publicKey: string;
   privateKey?: string;
   listId?: string;
+  backInStock?: {
+    apiUrl: string;
+    listId: string;
+    platform: string;
+  }
 }
 
 export interface Config extends ClientConfig {
