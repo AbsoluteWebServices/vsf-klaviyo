@@ -1,4 +1,11 @@
-import { IdentifyParams, SubscribeParams, SubscriptionInfo, SubscriptionsParams, TrackParams } from './klaviyo';
+import {
+  BackInStockSubscribeParams,
+  IdentifyParams,
+  SubscribeParams,
+  SubscriptionInfo,
+  SubscriptionsParams,
+  TrackParams,
+} from './klaviyo';
 
 export interface KlaviyoApiMethods {
   identify(params: IdentifyParams): Promise<boolean>;
@@ -6,4 +13,5 @@ export interface KlaviyoApiMethods {
   subscriptions(params: SubscriptionsParams): Promise<SubscriptionInfo[]>;
   track(params: TrackParams): Promise<boolean>;
   unsubscribe(params: SubscriptionsParams): Promise<boolean>;
+  backInStockSubscribe(params: BackInStockSubscribeParams): Promise<boolean>;
 }

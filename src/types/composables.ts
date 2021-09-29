@@ -1,5 +1,5 @@
 import { ComputedProperty } from '@vue-storefront/core';
-import { CustomerProperties, EventProperties, ProfileProperties } from './klaviyo';
+import { BackInStockSubscribeParams, CustomerProperties, EventProperties, ProfileProperties } from './klaviyo';
 
 export interface TrackEvent {
   event: string;
@@ -13,6 +13,7 @@ export interface  UseKlaviyoErrors {
   subscribe: Error | null;
   checkSubscription: Error | null;
   unsubscribe: Error | null;
+  backInStockSubscribe: Error | null;
 }
 
 export interface UseKlaviyo {
@@ -26,4 +27,5 @@ export interface UseKlaviyo {
   checkSubscription: (params: { email?: string; phone_number?: string; push_token?: string }) =>  Promise<boolean>;
   subscribe: (params: { profile: ProfileProperties }) =>  Promise<boolean>;
   unsubscribe: (params: { email?: string; phone_number?: string; push_token?: string }) =>  Promise<boolean>;
+  backInStockSubscribe: (params: BackInStockSubscribeParams) =>  Promise<boolean>;
 }

@@ -101,3 +101,10 @@ export type CheckoutAttributes = CartAttributes & {
   $event_id: string;
   [key: string]: any;
 };
+
+export interface BackInStockSubscribeParams {
+  email: string;
+  variantId?: string;
+  productId: string;
+  subscribe?: boolean;
+}
