@@ -33,7 +33,7 @@
   "homepage": "https://github.com/AbsoluteWebServices/vsf-klaviyo#readme",
   "dependencies": {
     "@vue-storefront/core": "~2.4.1",
-    "axios": "^0.21.1",
+    "ohmyfetch": "^0.3.1",
     "vue-demi": "latest"
   },
   "devDependencies": {

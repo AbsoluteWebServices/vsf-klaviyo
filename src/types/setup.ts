@@ -1,6 +1,5 @@
-import { AxiosInstance } from 'axios';
-
-export interface ClientInstance extends AxiosInstance {
+export interface ClientInstance {
+  post(url: string, body: any, options?: any): Promise<any>;
 }
 
 export interface ClientConfig {
