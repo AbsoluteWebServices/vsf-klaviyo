@@ -13,9 +13,7 @@ export default async (
   const endpont = `${apiUrl}/v2/list/${listId}/subscribe?api_key=${privateKey}`;
 
   try {
-    const response = await client.delete(endpont, {
-      data: params
-    });
+    const response = await client.post(endpont, params, { method: 'DELETE' });
 
     if (response.status !== 200) {
       throw response.data;
