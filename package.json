@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AbsoluteWebServices/vsf-klaviyo.git"
+    "url": "https://github.com/AbsoluteWebServices/vsf-klaviyo.git"
   },
   "keywords": [
     "klaviyo",
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/AbsoluteWebServices/vsf-klaviyo#readme",
   "dependencies": {
-    "@vue-storefront/core": "~2.4.1",
+    "@absolute-web/vsf-core": "^0.0.1",
     "ohmyfetch": "^0.3.1",
     "vue-demi": "latest"
   },

@@ -5,7 +5,7 @@ import {
   FactoryParams,
   Logger,
   sharedRef,
-} from '@vue-storefront/core';
+} from '@absolute-web/vsf-core';
 import {
   BackInStockSubscribeParams,
   CustomerProperties,

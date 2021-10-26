@@ -1,7 +1,7 @@
-import { ApiClientMethods, IntegrationContext } from '@vue-storefront/core';
+import { ApiClientMethods, IntegrationContext } from '@absolute-web/vsf-core';
 import { ClientInstance, Config, KlaviyoApiMethods } from './types';
 
-declare module '@vue-storefront/core' {
+declare module '@absolute-web/vsf-core' {
   export interface Context {
     $klaviyo: IntegrationContext<ClientInstance, Config, ApiClientMethods<KlaviyoApiMethods>>;
   }

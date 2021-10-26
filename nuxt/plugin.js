@@ -1,4 +1,4 @@
-import { integrationPlugin } from '@vue-storefront/core';
+import { integrationPlugin } from '@absolute-web/vsf-core';
 
 const moduleOptions = JSON.parse('<%= JSON.stringify(options) %>');
 const defaultConfig = {};

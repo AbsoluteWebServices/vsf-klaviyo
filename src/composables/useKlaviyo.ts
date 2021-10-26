@@ -1,4 +1,4 @@
-import { Context } from '@vue-storefront/core';
+import { Context } from '@absolute-web/vsf-core';
 import { SubscriptionsParams } from '../types';
 import { useKlaviyoFactory, UseKlaviyoFactoryParams } from '../factories/useKlaviyoFactory';
 
