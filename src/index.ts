@@ -1,4 +1,4 @@
-import { track } from '@vue-storefront/core';
+import { track } from '@absolute-web/vsf-core';
 
 track('VSFKlaviyo');
 
