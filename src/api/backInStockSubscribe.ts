@@ -7,7 +7,7 @@ export default async (
 ): Promise<boolean> => {
   const { backInStock, publicKey } = config;
 
-  if (!backInStock || !backInStock.apiUrl || !backInStock.listId || !publicKey) {
+  if (!backInStock || !backInStock.apiUrl || !publicKey) {
     return false;
   }
 
@@ -15,12 +15,11 @@ export default async (
   const data = new URLSearchParams();
 
   data.append('a', publicKey);
-  data.append('g', backInStock.listId)
   data.append('email', params.email);
   data.append('product', params.productId);
   data.append('variant', params.variantId || params.productId);
   data.append('platform', backInStock.platform);
-  // data.append('store', 3);
+  data.append('store', params.storeId);
 
   if (params.subscribe) {
     data.append('subscribe_for_newsletter', String(params.subscribe));
