@@ -107,4 +107,5 @@ export interface BackInStockSubscribeParams {
   variantId?: string;
   productId: string;
   subscribe?: boolean;
+  storeId: string;
 }
