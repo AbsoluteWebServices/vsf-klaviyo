@@ -23,7 +23,7 @@ const onCreate = (settings: Config): { config: Config; client: ClientInstance } 
           'Content-Type': 'application/json'
         },
         ...options,
-        body: JSON.stringify(body)
+        body: typeof body === 'object' ? JSON.stringify(body) : body,
       });
 
       return { data, status: 200 };
