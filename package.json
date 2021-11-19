@@ -1,6 +1,6 @@
 {
   "name": "@absolute-web/vsf-klaviyo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "The Klaviyo module.",
   "main": "lib/index.cjs.js",
   "module": "lib/index.es.js",
