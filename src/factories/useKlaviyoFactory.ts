@@ -175,12 +175,12 @@ export function useKlaviyoFactory(
       }
     };
 
-    const backInStockSubscribe = async ({ email, productId, variantId, subscribe }: BackInStockSubscribeParams): Promise<boolean> => {
+    const backInStockSubscribe = async ({ email, productId, variantId, subscribe, storeId }: BackInStockSubscribeParams): Promise<boolean> => {
       Logger.debug(`useKlaviyo/${ssrKey}/backInStockSubscribe`, { email, productId, variantId, subscribe });
 
       try {
         loading.value = true;
-        const result = await _factoryParams.backInStockSubscribe({ email, productId, variantId, subscribe });
+        const result = await _factoryParams.backInStockSubscribe({ email, productId, variantId, subscribe, storeId });
         error.value.backInStockSubscribe = null;
         return result;
       } catch (err: any) {
