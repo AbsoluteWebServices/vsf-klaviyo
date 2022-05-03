@@ -26,7 +26,7 @@ export default async (
   }
 
   try {
-    const response = await client.post(endpoint, data.toString(), {
+    const response = await client.post(endpoint, data, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
