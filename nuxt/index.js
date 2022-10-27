@@ -13,6 +13,9 @@ export default function (moduleOptions) {
     scripts.push({
       src: `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${moduleOptions.publicKey}`,
       async: true,
+      ...(moduleOptions?.type
+        ? { type: moduleOptions.type }
+        : {}),
     })
   }
 
